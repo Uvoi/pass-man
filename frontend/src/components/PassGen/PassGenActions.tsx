@@ -1,13 +1,8 @@
 import { Eye, X } from "lucide-react";
 
-import type { GenerateSettings } from "../Generate/generate";
-
-import { Button } from "../Button/Button";
-
-import { SettingsModal } from "../Modal/SettingsModal";
-
-import { AnimatedLabel } from "../Button/AnimatedLabel";
-
+import { AnimatedLabel, Button } from "../Button";
+import type { GenerateSettings } from "../Generate";
+import { SettingsModal } from "../Modal";
 
 type PassGenActionsProps = {
     settings: GenerateSettings;
@@ -18,11 +13,8 @@ type PassGenActionsProps = {
     onGenerate: () => void;
     onSettingsChange: (settings: GenerateSettings) => void;
     onReset: () => void;
-    onAddToPassManChange: (
-        value: boolean,
-    ) => void;
+    onAddToPassManChange: (value: boolean) => void;
 };
-
 
 export const PassGenActions = ({
     settings,
@@ -34,8 +26,7 @@ export const PassGenActions = ({
     onSettingsChange,
     onReset,
     onAddToPassManChange,
-}: PassGenActionsProps) =>
-{
+}: PassGenActionsProps) => {
     return (
         <div
             className="
@@ -45,39 +36,22 @@ export const PassGenActions = ({
             "
         >
             <div className="flex gap-2 w-full">
-                <Button
-                    onClick={onGenerate}
-                    className="w-full"
-                    disabled={loading}
-                >
-                    {loading
-                        ? (
-                            <Eye
-                                size={30}
-                                strokeWidth={3}
-                                className="
+                <Button onClick={onGenerate} className="w-full" disabled={loading}>
+                    {loading ? (
+                        <Eye
+                            size={30}
+                            strokeWidth={3}
+                            className="
                                     animate-spin
                                     text-accent
                                 "
-                            />
-                        )
-                        : (
-                            <AnimatedLabel
-                                text={
-                                    errorMsg ||
-                                    "Generate"
-                                }
-                                error={!!errorMsg}
-                            />
-                        )
-                    }
+                        />
+                    ) : (
+                        <AnimatedLabel text={errorMsg || "Generate"} error={!!errorMsg} />
+                    )}
                 </Button>
 
-                <SettingsModal
-                    settings={settings}
-                    onChange={onSettingsChange}
-                    disabled={loading}
-                />
+                <SettingsModal settings={settings} onChange={onSettingsChange} disabled={loading} />
 
                 <Button
                     onClick={onReset}
@@ -91,10 +65,7 @@ export const PassGenActions = ({
                     "
                     disabled={loading}
                 >
-                    <X
-                        size={30}
-                        strokeWidth={3}
-                    />
+                    <X size={30} strokeWidth={3} />
                 </Button>
             </div>
 
@@ -111,15 +82,10 @@ export const PassGenActions = ({
                 <input
                     type="checkbox"
                     checked={addToPassMan}
-                    onChange={event =>
-                        onAddToPassManChange(
-                            event.target.checked,
-                        )
-                    }
+                    onChange={(event) => onAddToPassManChange(event.target.checked)}
                     disabled={loading}
                     className="accent-accent"
                 />
-
                 Add to PassMan
             </label>
         </div>

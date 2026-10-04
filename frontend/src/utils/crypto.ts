@@ -1,36 +1,25 @@
-import type { EncryptedPassItem, PassItem } from "../types/pass";
-
+import type { EncryptedPassItem, PassItem } from "../types";
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
-const bytesToBase64 = (bytes: Uint8Array) =>
-{
+const bytesToBase64 = (bytes: Uint8Array) => {
     let binary = "";
 
-    for (const byte of bytes)
-    {
+    for (const byte of bytes) {
         binary += String.fromCharCode(byte);
     }
 
     return btoa(binary);
 };
 
-const base64ToBytes = (value: string) =>
-{
+const base64ToBytes = (value: string) => {
     const binary = atob(value);
 
-    return Uint8Array.from(
-        binary,
-        char => char.charCodeAt(0),
-    );
+    return Uint8Array.from(binary, (char) => char.charCodeAt(0));
 };
 
-const deriveKey = async (
-    password: string,
-    salt: Uint8Array,
-) =>
-{
+const deriveKey = async (password: string, salt: Uint8Array) => {
     const saltBuffer = new Uint8Array(salt).buffer;
 
     const passwordKey = await crypto.subtle.importKey(
@@ -61,20 +50,12 @@ const deriveKey = async (
 export const encryptPassItem = async (
     item: PassItem,
     password: string,
-): Promise<EncryptedPassItem> =>
-{
-    const salt = crypto.getRandomValues(
-        new Uint8Array(16),
-    );
+): Promise<EncryptedPassItem> => {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
 
-    const iv = crypto.getRandomValues(
-        new Uint8Array(16),
-    );
+    const iv = crypto.getRandomValues(new Uint8Array(16));
 
-    const key = await deriveKey(
-        password,
-        salt,
-    );
+    const key = await deriveKey(password, salt);
 
     const payload = JSON.stringify({
         key: item.key,
@@ -96,37 +77,26 @@ export const encryptPassItem = async (
         id: item.id,
         iv: bytesToBase64(iv),
         salt: bytesToBase64(salt),
-        data: bytesToBase64(
-            new Uint8Array(encrypted),
-        ),
+        data: bytesToBase64(new Uint8Array(encrypted)),
     };
 };
 
 export const encryptPassItems = async (
     items: PassItem[],
     password: string,
-): Promise<EncryptedPassItem[]> =>
-{
-    return Promise.all(
-        items.map(item =>
-            encryptPassItem(item, password),
-        ),
-    );
+): Promise<EncryptedPassItem[]> => {
+    return Promise.all(items.map((item) => encryptPassItem(item, password)));
 };
 
 export const decryptPassItem = async (
     encrypted: EncryptedPassItem,
     password: string,
-): Promise<PassItem> =>
-{
+): Promise<PassItem> => {
     const iv = base64ToBytes(encrypted.iv);
     const salt = base64ToBytes(encrypted.salt);
     const data = base64ToBytes(encrypted.data);
 
-    const key = await deriveKey(
-        password,
-        salt,
-    );
+    const key = await deriveKey(password, salt);
 
     const decrypted = await crypto.subtle.decrypt(
         {
@@ -140,8 +110,7 @@ export const decryptPassItem = async (
 
     const text = decoder.decode(decrypted);
 
-    try
-    {
+    try {
         const parsed = JSON.parse(text);
 
         return {
@@ -150,73 +119,43 @@ export const decryptPassItem = async (
             tag: parsed.tag,
             params: parsed.params,
         };
-    }
-    catch
-    {
-        return createGarbagePassItem(
-            encrypted.id,
-            new Uint8Array(decrypted),
-        );
+    } catch {
+        return createGarbagePassItem(encrypted.id, new Uint8Array(decrypted));
     }
 };
 
 export const decryptPassItems = async (
     encryptedItems: EncryptedPassItem[],
     password: string,
-): Promise<PassItem[]> =>
-{
-    return Promise.all(
-        encryptedItems.map(item =>
-            decryptPassItem(item, password),
-        ),
-    );
+): Promise<PassItem[]> => {
+    return Promise.all(encryptedItems.map((item) => decryptPassItem(item, password)));
 };
 
-const createGarbagePassItem = (
-    id: number,
-    bytes: Uint8Array,
-): PassItem =>
-{
+const createGarbagePassItem = (id: number, bytes: Uint8Array): PassItem => {
     const text = Array.from(bytes)
-        .map(byte =>
-            String.fromCharCode(
-                33 + (byte % 94),
-            ),
-        )
+        .map((byte) => String.fromCharCode(33 + (byte % 94)))
         .join("");
 
-    const getPart = (
-        start: number,
-        length: number,
-    ) =>
-    {
-        if (text.length === 0)
-        {
+    const getPart = (start: number, length: number) => {
+        if (text.length === 0) {
             return "garbage";
         }
 
         let result = "";
 
-        for (let i = 0; i < length; i++)
-        {
-            result += text[
-                (start + i) % text.length
-            ];
+        for (let i = 0; i < length; i++) {
+            result += text[(start + i) % text.length];
         }
 
         return result;
     };
 
-    const byte = (offset: number) =>
-    {
-        if (bytes.length === 0)
-        {
+    const byte = (offset: number) => {
+        if (bytes.length === 0) {
             return 0;
         }
 
-        return bytes[
-            offset % bytes.length
-        ];
+        return bytes[offset % bytes.length];
     };
 
     return {
@@ -240,14 +179,11 @@ const createGarbagePassItem = (
             },
 
             charsetGroups: {
-                letters:
-                    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+                letters: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
 
-                digits:
-                    "0123456789",
+                digits: "0123456789",
 
-                special:
-                    "!@#$%^&*",
+                special: "!@#$%^&*",
             },
 
             customAlphabet: getPart(24, 16),

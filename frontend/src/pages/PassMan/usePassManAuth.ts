@@ -1,134 +1,80 @@
+import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 
-import type {
-    Dispatch,
-    SetStateAction,
-} from "react";
-
-import type {
-    AuthAction,
-    PassItem,
-} from "../../types/pass";
-
+import type { AuthAction, PassItem } from "../../types";
 
 type UsePassManAuthParams = {
     generatedPasswords: Record<number, string>;
 
-    setGeneratedPasswords: Dispatch<
-        SetStateAction<Record<number, string>>
-    >;
+    setGeneratedPasswords: Dispatch<SetStateAction<Record<number, string>>>;
 };
-
 
 export const usePassManAuth = ({
     generatedPasswords,
     setGeneratedPasswords,
-}: UsePassManAuthParams) =>
-{
-    const [authItem, setAuthItem] =
-        useState<PassItem | null>(null);
+}: UsePassManAuthParams) => {
+    const [authItem, setAuthItem] = useState<PassItem | null>(null);
 
-    const [authAction, setAuthAction] =
-        useState<AuthAction | null>(null);
+    const [authAction, setAuthAction] = useState<AuthAction | null>(null);
 
-    const [masterKey, setMasterKey] =
-        useState("");
+    const [masterKey, setMasterKey] = useState("");
 
-    const [authError, setAuthError] =
-        useState(false);
+    const [authError, setAuthError] = useState(false);
 
+    const generatePassword = async (item: PassItem, key: string) => {
+        const { getPassword } = await import("../../components/Generate/generate");
 
-    const generatePassword = async (
-        item: PassItem,
-        key: string,
-    ) =>
-    {
-        const { getPassword } =
-            await import(
-                "../../components/Generate/generate"
-            );
-
-        return getPassword(
-            key,
-            item.key,
-            item.tag,
-            item.params,
-        );
+        return getPassword(key, item.key, item.tag, item.params);
     };
 
-
-    const openAuthModal = (
-        item: PassItem,
-        action: AuthAction,
-    ) =>
-    {
+    const openAuthModal = (item: PassItem, action: AuthAction) => {
         setAuthItem(item);
         setAuthAction(action);
         setMasterKey("");
         setAuthError(false);
     };
 
-
-    const closeAuthModal = () =>
-    {
+    const closeAuthModal = () => {
         setAuthItem(null);
         setAuthAction(null);
         setMasterKey("");
         setAuthError(false);
     };
 
-
-    const handleAuth = async () =>
-    {
-        if (!authItem || !authAction)
-        {
+    const handleAuth = async () => {
+        if (!authItem || !authAction) {
             return;
         }
 
-        if (!masterKey)
-        {
+        if (!masterKey) {
             setAuthError(true);
 
             return;
         }
 
-        try
-        {
-            const password = await generatePassword(
-                authItem,
-                masterKey,
-            );
+        try {
+            const password = await generatePassword(authItem, masterKey);
 
-            if (authAction === "view")
-            {
-                setGeneratedPasswords(prev => ({
+            if (authAction === "view") {
+                setGeneratedPasswords((prev) => ({
                     ...prev,
                     [authItem.id]: password,
                 }));
             }
 
-            if (authAction === "copy")
-            {
-                await navigator.clipboard.writeText(
-                    password,
-                );
+            if (authAction === "copy") {
+                await navigator.clipboard.writeText(password);
             }
 
             closeAuthModal();
-        }
-        catch
-        {
+        } catch {
             setAuthError(true);
         }
     };
 
-
-    const handleView = (item: PassItem) =>
-    {
-        if (generatedPasswords[item.id])
-        {
-            setGeneratedPasswords(prev =>
-            {
+    const handleView = (item: PassItem) => {
+        if (generatedPasswords[item.id]) {
+            setGeneratedPasswords((prev) => {
                 const next = { ...prev };
 
                 delete next[item.id];
@@ -139,35 +85,20 @@ export const usePassManAuth = ({
             return;
         }
 
-        openAuthModal(
-            item,
-            "view",
-        );
+        openAuthModal(item, "view");
     };
 
+    const handleCopy = async (item: PassItem) => {
+        const password = generatedPasswords[item.id];
 
-    const handleCopy = async (
-        item: PassItem,
-    ) =>
-    {
-        const password =
-            generatedPasswords[item.id];
-
-        if (password)
-        {
-            await navigator.clipboard.writeText(
-                password,
-            );
+        if (password) {
+            await navigator.clipboard.writeText(password);
 
             return;
         }
 
-        openAuthModal(
-            item,
-            "copy",
-        );
+        openAuthModal(item, "copy");
     };
-
 
     return {
         authItem,

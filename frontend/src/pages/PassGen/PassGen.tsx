@@ -1,28 +1,13 @@
 import { useState } from "react";
 
-import { Title } from "../../components/Title/Title";
+import { PassGenActions, PassGenForm, PassGenPassword } from "../../components/PassGen";
+import { ManagerPasswordModal } from "../../components/PassMan";
+import { Title } from "../../components/Title";
+import { usePassGen } from "./usePassGen";
+import { usePassGenManager } from "./usePassGenManager";
 
-import { ManagerPasswordModal } from "../../components/PassMan/ManagerPasswordModal";
-
-import { PassGenForm } from "../../components/PassGen/PassGenForm";
-
-import { PassGenActions } from "../../components/PassGen/PassGenActions";
-
-import { PassGenPassword } from "../../components/PassGen/PassGenPassword";
-
-import {
-    usePassGen,
-} from "./usePassGen";
-
-import {
-    usePassGenManager,
-} from "./usePassGenManager";
-
-
-function PassGen()
-{
-    const [addToPassMan, setAddToPassMan] =
-        useState(false);
+export const PassGen = () => {
+    const [addToPassMan, setAddToPassMan] = useState(false);
 
     const {
         managerModalOpen,
@@ -34,13 +19,12 @@ function PassGen()
         confirmManagerPassword,
         closeManagerModal,
     } = usePassGenManager({
-        onError: message =>
-        {
+        onError: (message) => {
             console.error(message);
         },
     });
 
-        const {
+    const {
         masterKey,
         key,
         tag,
@@ -60,16 +44,11 @@ function PassGen()
 
         generatePassword,
         reset,
-    } = usePassGen({onGenerated: addItemToPassMan});
+    } = usePassGen({ onGenerated: addItemToPassMan });
 
-
-    const handleGenerate = async () =>
-    {
-        await generatePassword(
-            addToPassMan,
-        );
+    const handleGenerate = async () => {
+        await generatePassword(addToPassMan);
     };
-
 
     return (
         <div
@@ -82,10 +61,7 @@ function PassGen()
                 xl:px-60
             "
         >
-            <Title
-                trigger={titleTrigger}
-                defaultText="pass-gen"
-            />
+            <Title trigger={titleTrigger} defaultText="pass-gen" />
 
             <div
                 className="
@@ -97,19 +73,17 @@ function PassGen()
                     md:p-8
                 "
             >
-
                 <PassGenForm
-                  masterKey={masterKey}
-                  passKey={key}
-                  tag={tag}
-                  masterKeyError={masterKeyError}
-                  keyError={keyError}
-                  disabled={loading}
-                  onMasterKeyChange={setMasterKey}
-                  onKeyChange={setKey}
-                  onTagChange={setTag}
+                    masterKey={masterKey}
+                    passKey={key}
+                    tag={tag}
+                    masterKeyError={masterKeyError}
+                    keyError={keyError}
+                    disabled={loading}
+                    onMasterKeyChange={setMasterKey}
+                    onKeyChange={setKey}
+                    onTagChange={setTag}
                 />
-
 
                 <PassGenActions
                     settings={settings}
@@ -119,31 +93,20 @@ function PassGen()
                     onGenerate={handleGenerate}
                     onSettingsChange={setSettings}
                     onReset={reset}
-                    onAddToPassManChange={
-                        setAddToPassMan
-                    }
+                    onAddToPassManChange={setAddToPassMan}
                 />
 
-                <PassGenPassword
-                    password={password}
-                />
+                <PassGenPassword password={password} />
             </div>
 
             {managerModalOpen && (
                 <ManagerPasswordModal
                     value={managerInput}
                     onChange={setManagerInput}
-                    onConfirm={
-                        confirmManagerPassword
-                    }
-                    onClose={
-                        closeManagerModal
-                    }
+                    onConfirm={confirmManagerPassword}
+                    onClose={closeManagerModal}
                 />
             )}
         </div>
     );
-}
-
-
-export default PassGen;
+};

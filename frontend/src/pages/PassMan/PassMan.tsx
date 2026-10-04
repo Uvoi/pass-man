@@ -1,32 +1,24 @@
 import { useEffect, useState } from "react";
 
-import { CustomAlphabetModal } from "../../components/PassMan/CustomAlphabetModal";
-import { EditPassModal } from "../../components/PassMan/EditPassModal";
-import { MasterKeyModal } from "../../components/PassMan/MasterKeyModal";
-import { ManagerPasswordModal } from "../../components/PassMan/ManagerPasswordModal";
-import { PassContextMenu } from "../../components/PassMan/PassContextMenu";
-import { PassManHeader } from "../../components/PassMan/PassManHeader";
-import { PassManTable } from "../../components/PassMan/PassManTable";
-
-import type { PassItem } from "../../types/pass";
-
 import {
-    usePassMan,
-} from "./usePassMan";
+    CustomAlphabetModal,
+    EditPassModal,
+    ManagerPasswordModal,
+    MasterKeyModal,
+    PassContextMenu,
+    PassManHeader,
+    PassManTable,
+} from "../../components/PassMan";
 
-import {
-    usePassManActions,
-} from "./usePassManActions";
+import type { PassItem } from "../../types";
 
-import {
-    usePassManAuth,
-} from "./usePassManAuth";
+import { usePassMan } from "./usePassMan";
+import { usePassManActions } from "./usePassManActions";
+import { usePassManAuth } from "./usePassManAuth";
 
-import type {
-    ContextMenuState,
-} from "./types";
+import type { ContextMenuState } from "./types";
 
-import { useManagerSession } from "../../context/ManagerSessionContext";
+import { useManagerSession } from "../../context/useManagerSession";
 
 
 export const PassMan = () =>
@@ -97,16 +89,9 @@ export const PassMan = () =>
 
     useEffect(() =>
     {
-        setManagerModalOpen(true);
-    }, []);
-
-
-    useEffect(() =>
-    {
         if (!isAuthenticated)
         {
             setGeneratedPasswords({});
-            setManagerModalOpen(true);
         }
     }, [
         isAuthenticated,
@@ -188,7 +173,7 @@ export const PassMan = () =>
             />
 
 
-            {managerModalOpen && (
+            {(managerModalOpen || !isAuthenticated) && (
                 <ManagerPasswordModal
                     value={managerInput}
                     onChange={setManagerInput}

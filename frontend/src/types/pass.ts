@@ -1,4 +1,4 @@
-import type { GenerateSettings } from "../components/Generate/generate";
+import type { GenerateSettings } from "../components/Generate";
 
 export type PassItem = {
     id: number;

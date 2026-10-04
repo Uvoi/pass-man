@@ -4,8 +4,7 @@ type ParamProps = {
     onClick?: () => void;
 };
 
-export const Param = ({ label, value, onClick }: ParamProps) =>
-{
+export const Param = ({ label, value, onClick }: ParamProps) => {
     return (
         <button
             type="button"
@@ -19,21 +18,16 @@ export const Param = ({ label, value, onClick }: ParamProps) =>
                 border border-border
                 text-text
                 transition-colors
-                ${onClick
-                    ? "hover:text-accent hover:border-accent cursor-pointer"
-                    : "cursor-default"
+                ${
+                    onClick
+                        ? "hover:text-accent hover:border-accent cursor-pointer"
+                        : "cursor-default"
                 }
             `}
         >
-            <span className="text-accent font-semibold">
-                {label}
-            </span>
+            <span className="text-accent font-semibold">{label}</span>
 
-            {value !== undefined && (
-                <span>
-                    {value}
-                </span>
-            )}
+            {value !== undefined && <span>{value}</span>}
         </button>
     );
 };

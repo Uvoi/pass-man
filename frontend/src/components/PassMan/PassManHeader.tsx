@@ -3,17 +3,10 @@ type PassManHeaderProps = {
     onChangeManagerPassword: () => void;
 };
 
-
-export const PassManHeader = ({
-    isAuthenticated,
-    onChangeManagerPassword,
-}: PassManHeaderProps) =>
-{
+export const PassManHeader = ({ isAuthenticated, onChangeManagerPassword }: PassManHeaderProps) => {
     return (
         <div className="mb-6 flex items-center justify-between">
-            <div className="text-text text-2xl">
-                Passwords
-            </div>
+            <div className="text-text text-2xl">Passwords</div>
 
             {isAuthenticated && (
                 <button

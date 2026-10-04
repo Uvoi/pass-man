@@ -1,5 +1,5 @@
-import { getPassword } from "./generate";
 import type { GenerateSettings } from "./generate";
+import { getPassword } from "./generate";
 
 type WorkerInput = {
     masterKey: string;

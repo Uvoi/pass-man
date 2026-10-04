@@ -1,8 +1,8 @@
 import { argon2id } from "hash-wasm";
 
-const getNormalized = (value: string) => (value.trim());
+const getNormalized = (value: string) => value.trim();
 
-const getSalt = (normalizedKey: string, tag: string) => (`${normalizedKey}:${tag || 'default'}:v1`);
+const getSalt = (normalizedKey: string, tag: string) => `${normalizedKey}:${tag || "default"}:v1`;
 
 export type ArgonParams = {
     iterations: number;
@@ -50,30 +50,28 @@ export const defaultSettings: GenerateSettings = {
     customAlphabet: "",
 };
 
-const getHash = async (masterKey: string, salt: string, params: ArgonParams) => 
-    (await argon2id({
+const getHash = async (masterKey: string, salt: string, params: ArgonParams) =>
+    await argon2id({
         password: masterKey,
         salt: salt,
         parallelism: 1,
         iterations: params.iterations,
         memorySize: params.memorySize,
         hashLength: params.hashLength,
-        outputType: "binary", 
-    }));
+        outputType: "binary",
+    });
 
-export const normalizeCharset = (value: string) => (
-    Array.from(new Set(Array.from(value))).join("")
-);
+export const normalizeCharset = (value: string) => Array.from(new Set(Array.from(value))).join("");
 
 export const getCharset = (settings: GenerateSettings) => {
     const selected = Object.entries(settings.selectedGroups).flatMap(([key, enabled]) =>
-        enabled ? Array.from(settings.charsetGroups[key as CharsetGroupKey]) : []
+        enabled ? Array.from(settings.charsetGroups[key as CharsetGroupKey]) : [],
     );
 
     return normalizeCharset([...selected, ...Array.from(settings.customAlphabet)].join(""));
 };
 
-function mapToCharset(bytes: Uint8Array, length: number, charset: string) {
+const mapToCharset = (bytes: Uint8Array, length: number, charset: string) => {
     const limit = 256 - (256 % charset.length);
     let result = "";
     let i = 0;
@@ -85,10 +83,14 @@ function mapToCharset(bytes: Uint8Array, length: number, charset: string) {
     }
 
     return result;
-}
+};
 
-export const getPassword = async (masterKey: string, key: string, tag: string, params: GenerateSettings) =>
-{
+export const getPassword = async (
+    masterKey: string,
+    key: string,
+    tag: string,
+    params: GenerateSettings,
+) => {
     const normalizedMasterKey = getNormalized(masterKey);
     const normalizedKey = getNormalized(key);
     const normalizedTag = getNormalized(tag);
@@ -101,4 +103,4 @@ export const getPassword = async (masterKey: string, key: string, tag: string, p
     const finalPassword = mapToCharset(hash, params.hashLength, charset);
 
     return finalPassword;
-}
+};

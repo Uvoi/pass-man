@@ -1,5 +1,4 @@
-import { Input } from "../Input/Input";
-
+import { Input } from "../Input";
 
 type PassGenFormProps = {
     masterKey: string;
@@ -15,7 +14,6 @@ type PassGenFormProps = {
     onTagChange: (value: string) => void;
 };
 
-
 export const PassGenForm = ({
     masterKey,
     passKey,
@@ -28,8 +26,7 @@ export const PassGenForm = ({
     onMasterKeyChange,
     onKeyChange,
     onTagChange,
-}: PassGenFormProps) =>
-{
+}: PassGenFormProps) => {
     return (
         <div
             className="
@@ -44,10 +41,7 @@ export const PassGenForm = ({
                 onChange={onMasterKeyChange}
                 placeholder="Master password*"
                 type="password"
-                rightAddon={[
-                    "visible",
-                    "clear",
-                ]}
+                rightAddon={["visible", "clear"]}
                 error={masterKeyError}
                 disabled={disabled}
             />

@@ -1,6 +1,5 @@
-import type { PassItem } from "../../types/pass";
+import type { PassItem } from "../../types";
 import { PassRow } from "./PassRow";
-
 
 type PassManTableProps = {
     loading: boolean;
@@ -10,13 +9,8 @@ type PassManTableProps = {
     onView: (item: PassItem) => void;
     onCopy: (item: PassItem) => void;
     onCustomAlphabet: (item: PassItem) => void;
-    onContextMenu: (
-        x: number,
-        y: number,
-        item: PassItem,
-    ) => void;
+    onContextMenu: (x: number, y: number, item: PassItem) => void;
 };
-
 
 export const PassManTable = ({
     loading,
@@ -26,17 +20,10 @@ export const PassManTable = ({
     onCopy,
     onCustomAlphabet,
     onContextMenu,
-}: PassManTableProps) =>
-{
-    if (loading)
-    {
-        return (
-            <div className="text-text/50">
-                Loading...
-            </div>
-        );
+}: PassManTableProps) => {
+    if (loading) {
+        return <div className="text-text/50">Loading...</div>;
     }
-
 
     return (
         <div
@@ -56,41 +43,25 @@ export const PassManTable = ({
                     font-semibold
                 "
             >
-                <div>
-                    Key
-                </div>
+                <div>Key</div>
 
-                <div>
-                    Tag
-                </div>
+                <div>Tag</div>
 
-                <div>
-                    Password
-                </div>
+                <div>Password</div>
 
-                <div>
-                    Parameters
-                </div>
+                <div>Parameters</div>
             </div>
 
             <div className="divide-y-2 divide-border">
-                {passwords.map(item => (
+                {passwords.map((item) => (
                     <PassRow
                         key={item.id}
                         item={item}
                         password={generatedPasswords[item.id]}
                         onView={() => onView(item)}
                         onCopy={() => onCopy(item)}
-                        onCustomAlphabet={() =>
-                            onCustomAlphabet(item)
-                        }
-                        onContextMenu={(x, y) =>
-                            onContextMenu(
-                                x,
-                                y,
-                                item,
-                            )
-                        }
+                        onCustomAlphabet={() => onCustomAlphabet(item)}
+                        onContextMenu={(x, y) => onContextMenu(x, y, item)}
                     />
                 ))}
             </div>

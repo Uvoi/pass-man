@@ -1,15 +1,10 @@
-import { Input } from "../Input/Input";
-
+import { Input } from "../Input";
 
 type PassGenPasswordProps = {
     password: string;
 };
 
-
-export const PassGenPassword = ({
-    password,
-}: PassGenPasswordProps) =>
-{
+export const PassGenPassword = ({ password }: PassGenPasswordProps) => {
     return (
         <Input
             value={password}

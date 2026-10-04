@@ -1,13 +1,15 @@
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
-import { BrowserRouter } from 'react-router'
-import { ManagerSessionProvider } from './context/ManagerSessionContext.tsx'
+import "./index.css";
 
-createRoot(document.getElementById('root')!).render(
-  <BrowserRouter>
-    <ManagerSessionProvider>
-      <App />
-    </ManagerSessionProvider>
-  </BrowserRouter>,
-)
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router";
+
+import { App } from "./App";
+import { ManagerSessionProvider } from "./context";
+
+createRoot(document.getElementById("root")!).render(
+    <BrowserRouter>
+        <ManagerSessionProvider>
+            <App />
+        </ManagerSessionProvider>
+    </BrowserRouter>,
+);

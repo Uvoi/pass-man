@@ -1,26 +1,25 @@
-import { Header } from "./components/Header/Header"
-import PassGen from "./pages/PassGen/PassGen"
-import { useSearchParams } from 'react-router';
-import { PassMan } from "./pages/PassMan/PassMan";
+import { useSearchParams } from "react-router";
 
-const menu =
-{
-  "pass-gen": <PassGen />,
-  "pass-man": <PassMan />
-}
+import { Header } from "./components/Header";
+import { PassGen, PassMan } from "./pages";
 
-function App() {
+const menu = {
+    "pass-gen": <PassGen />,
+    "pass-man": <PassMan />,
+};
 
-  const [searchParams] = useSearchParams();
-  const page = searchParams.get('page');
+export const App = () => {
+    const [searchParams] = useSearchParams();
+    const page = searchParams.get("page");
 
-
-  return (
-    <div className="bg-bg min-h-screen w-full flex flex-col justify-center px-4">
-      <Header />
-      {page && menu[page as keyof typeof menu] ? menu[page as keyof typeof menu] : <PassGen />}     
-    </div>
-  )
-}
-
-export default App
+    return (
+        <div className="bg-bg min-h-screen w-full flex flex-col justify-center px-4">
+            <Header />
+            {page && menu[page as keyof typeof menu] ? (
+                menu[page as keyof typeof menu]
+            ) : (
+                <PassGen />
+            )}
+        </div>
+    );
+};

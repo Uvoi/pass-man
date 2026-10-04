@@ -2,11 +2,9 @@ import { useState } from "react";
 
 import {
     addPassManItem,
-} from "../../api/passManApi";
+} from "../../api";
 
-import {
-    useManagerSession,
-} from "../../context/ManagerSessionContext";
+import { useManagerSession } from "../../context/useManagerSession";
 
 import type { PassItem } from "../../types/pass";
 

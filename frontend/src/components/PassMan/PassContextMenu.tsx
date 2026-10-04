@@ -7,13 +7,7 @@ type PassContextMenuProps = {
     onDelete: () => void;
 };
 
-export const PassContextMenu = ({
-    x,
-    y,
-    onEdit,
-    onDelete,
-}: PassContextMenuProps) =>
-{
+export const PassContextMenu = ({ x, y, onEdit, onDelete }: PassContextMenuProps) => {
     return (
         <div
             className="fixed z-100 min-w-48 rounded-lg border-2 border-border bg-surface p-1 shadow-xl"
@@ -21,7 +15,7 @@ export const PassContextMenu = ({
                 left: x,
                 top: y,
             }}
-            onClick={event => event.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
         >
             <button
                 type="button"

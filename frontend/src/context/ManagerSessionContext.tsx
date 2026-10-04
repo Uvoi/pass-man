@@ -1,64 +1,31 @@
-import {
-    createContext,
-    useContext,
-    useEffect,
-    useState,
-    type ReactNode,
-} from "react";
+import { type ReactNode,useEffect, useState } from "react";
 
-
-type ManagerSessionContextValue = {
-    managerPassword: string | null;
-    isAuthenticated: boolean;
-
-    startSession: (password: string) => void;
-    clearSession: () => void;
-};
-
+import { ManagerSessionContext } from "./managerSessionContext.ts";
 
 const SESSION_TIME = 5 * 60 * 1000;
 
+export const ManagerSessionProvider = ({ children }: { children: ReactNode }) => {
+    const [managerPassword, setManagerPassword] = useState<string | null>(null);
 
-const ManagerSessionContext =
-    createContext<ManagerSessionContextValue | null>(null);
+    const [timer, setTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
 
-
-export const ManagerSessionProvider = ({
-    children,
-}: {
-    children: ReactNode;
-}) =>
-{
-    const [managerPassword, setManagerPassword] =
-        useState<string | null>(null);
-
-    const [timer, setTimer] =
-        useState<ReturnType<typeof setTimeout> | null>(null);
-
-
-    const clearSession = () =>
-    {
+    const clearSession = () => {
         setManagerPassword(null);
 
-        if (timer)
-        {
+        if (timer) {
             clearTimeout(timer);
             setTimer(null);
         }
     };
 
-
-    const startSession = (password: string) =>
-    {
-        if (timer)
-        {
+    const startSession = (password: string) => {
+        if (timer) {
             clearTimeout(timer);
         }
 
         setManagerPassword(password);
 
-        const nextTimer = setTimeout(() =>
-        {
+        const nextTimer = setTimeout(() => {
             setManagerPassword(null);
             setTimer(null);
         }, SESSION_TIME);
@@ -66,18 +33,13 @@ export const ManagerSessionProvider = ({
         setTimer(nextTimer);
     };
 
-
-    useEffect(() =>
-    {
-        return () =>
-        {
-            if (timer)
-            {
+    useEffect(() => {
+        return () => {
+            if (timer) {
                 clearTimeout(timer);
             }
         };
     }, [timer]);
-
 
     return (
         <ManagerSessionContext.Provider
@@ -91,21 +53,4 @@ export const ManagerSessionProvider = ({
             {children}
         </ManagerSessionContext.Provider>
     );
-};
-
-
-export const useManagerSession = () =>
-{
-    const context = useContext(
-        ManagerSessionContext,
-    );
-
-    if (!context)
-    {
-        throw new Error(
-            "useManagerSession must be used inside ManagerSessionProvider",
-        );
-    }
-
-    return context;
 };

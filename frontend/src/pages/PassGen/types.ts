@@ -1,6 +1,5 @@
-import type { GenerateSettings } from "../../components/Generate/generate";
-import type { PassItem } from "../../types/pass";
-
+import type { GenerateSettings } from "../../components/Generate";
+import type { PassItem } from "../../types";
 
 export type PassGenState = {
     masterKey: string;
@@ -12,7 +11,6 @@ export type PassGenState = {
     errorMsg: string;
     titleTrigger: number;
 };
-
 
 export type PassGenManagerState = {
     managerModalOpen: boolean;

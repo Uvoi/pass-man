@@ -1,10 +1,11 @@
 import { Pencil, Settings } from "lucide-react";
 import { useState } from "react";
-import { Button } from "../Button/Button";
+
+import { Button } from "../Button";
+import type { CharsetGroupKey, GenerateSettings } from "../Generate";
+import { defaultCharsetGroups, getCharset, normalizeCharset } from "../Generate";
+import { Slider } from "../Slider";
 import { Modal } from "./Modal";
-import { Slider } from "../Slider/Slider";
-import { defaultCharsetGroups, getCharset, normalizeCharset } from "../Generate/generate";
-import type { CharsetGroupKey, GenerateSettings } from "../Generate/generate";
 
 type SettingsModalProps = {
     settings: GenerateSettings;
@@ -16,13 +17,14 @@ const charsetKeys = Object.keys(defaultCharsetGroups) as CharsetGroupKey[];
 
 const charsToEditValue = (value: string) => Array.from(value).join(",");
 
-const editValueToChars = (value: string) => normalizeCharset(
-    value
-        .split(",")
-        .map((part) => part.trim())
-        .filter(Boolean)
-        .join("")
-);
+const editValueToChars = (value: string) =>
+    normalizeCharset(
+        value
+            .split(",")
+            .map((part) => part.trim())
+            .filter(Boolean)
+            .join(""),
+    );
 
 type CharsetEditModalProps = {
     label: string;
@@ -42,8 +44,11 @@ const CharsetEditModal = ({ label, chars, onChange }: CharsetEditModalProps) => 
     return (
         <Modal
             trigger={
-                <Button onClick={() => {}} className="aspect-square p-2! bg-transparent hover:text-accent">
-                    <Pencil size={24} strokeWidth={3}/>
+                <Button
+                    onClick={() => {}}
+                    className="aspect-square p-2! bg-transparent hover:text-accent"
+                >
+                    <Pencil size={24} strokeWidth={3} />
                 </Button>
             }
             onOpen={() => setValue(charsToEditValue(chars))}
@@ -57,7 +62,9 @@ const CharsetEditModal = ({ label, chars, onChange }: CharsetEditModalProps) => 
                             onChange={(e) => setValue(e.target.value)}
                             className="min-h-32 resize-y rounded-lg border-2 border-border bg-transparent p-3 text-xl text-text focus-visible:outline-none"
                         />
-                        <span className="text-text text-sm opacity-70">{parsedChars.length} symbols</span>
+                        <span className="text-text text-sm opacity-70">
+                            {parsedChars.length} symbols
+                        </span>
                     </div>
                     <Button onClick={() => handleApply(close)} className="w-full">
                         Apply
@@ -105,8 +112,12 @@ export const SettingsModal = ({ settings, onChange, disabled }: SettingsModalPro
     return (
         <Modal
             trigger={
-                <Button onClick={() => {}} className="w-fit bg-accent! text-primary! active:text-text-dark! active:bg-muted! hover:text-text-dark!" disabled={disabled}>
-                    <Settings size={30} strokeWidth={3}/>
+                <Button
+                    onClick={() => {}}
+                    className="w-fit bg-accent! text-primary! active:text-text-dark! active:bg-muted! hover:text-text-dark!"
+                    disabled={disabled}
+                >
+                    <Settings size={30} strokeWidth={3} />
                 </Button>
             }
             onOpen={() => setLocal(settings)}
@@ -146,7 +157,10 @@ export const SettingsModal = ({ settings, onChange, disabled }: SettingsModalPro
                         </div>
                         <div className="flex flex-col gap-2">
                             {charsetKeys.map((key) => (
-                                <div key={key} className="flex items-center gap-3 rounded-lg border-2 border-border px-3 py-2">
+                                <div
+                                    key={key}
+                                    className="flex items-center gap-3 rounded-lg border-2 border-border px-3 py-2"
+                                >
                                     <input
                                         id={`charset-${key}`}
                                         type="checkbox"
@@ -154,10 +168,15 @@ export const SettingsModal = ({ settings, onChange, disabled }: SettingsModalPro
                                         onChange={(e) => updateSelectedGroup(key, e.target.checked)}
                                         className="h-5 w-5 accent-primary"
                                     />
-                                    <label htmlFor={`charset-${key}`} className="min-w-0 flex-1 text-xl text-text">
+                                    <label
+                                        htmlFor={`charset-${key}`}
+                                        className="min-w-0 flex-1 text-xl text-text"
+                                    >
                                         {defaultCharsetGroups[key].label}
                                     </label>
-                                    <span className="text-sm text-text opacity-70">{Array.from(local.charsetGroups[key]).length}</span>
+                                    <span className="text-sm text-text opacity-70">
+                                        {Array.from(local.charsetGroups[key]).length}
+                                    </span>
                                     <CharsetEditModal
                                         label={defaultCharsetGroups[key].label}
                                         chars={local.charsetGroups[key]}
@@ -172,9 +191,15 @@ export const SettingsModal = ({ settings, onChange, disabled }: SettingsModalPro
                             placeholder="Custom alphabet"
                             className="rounded-lg border-2 border-border bg-transparent px-3 py-2 text-xl text-text focus-visible:outline-none"
                         />
-                        {alphabetLength === 0 && <span className="text-error">Choose at least one symbol</span>}
+                        {alphabetLength === 0 && (
+                            <span className="text-error">Choose at least one symbol</span>
+                        )}
                     </div>
-                    <Button onClick={() => handleApply(close)} className="w-full" disabled={alphabetLength === 0}>
+                    <Button
+                        onClick={() => handleApply(close)}
+                        className="w-full"
+                        disabled={alphabetLength === 0}
+                    >
                         Apply
                     </Button>
                 </div>

@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
-import { Button } from "../Button/Button";
 import { X } from "lucide-react";
+import { useEffect, useState } from "react";
+
+import { Button } from "../Button";
 
 type ModalProps = {
     trigger: React.ReactNode;
@@ -26,9 +27,9 @@ export const Modal = ({ trigger, children, onOpen, disabled }: ModalProps) => {
 
     useEffect(() => {
         if (!open) return;
-        const handler = (e: KeyboardEvent) => e.key === 'Escape' && close();
-        window.addEventListener('keydown', handler);
-        return () => window.removeEventListener('keydown', handler);
+        const handler = (e: KeyboardEvent) => e.key === "Escape" && close();
+        window.addEventListener("keydown", handler);
+        return () => window.removeEventListener("keydown", handler);
     }, [open]);
 
     return (
@@ -38,18 +39,20 @@ export const Modal = ({ trigger, children, onOpen, disabled }: ModalProps) => {
             {open && (
                 <div
                     className={`fixed inset-0 bg-overlay flex items-center justify-center z-50 transition-opacity duration-200 ${
-                        visible ? 'opacity-100' : 'opacity-0'
+                        visible ? "opacity-100" : "opacity-0"
                     }`}
                     onClick={close}
                 >
                     <div
                         className={`max-h-[90vh] overflow-y-auto bg-surface rounded-xl px-4 py-4 md:px-6 min-w-80 max-w-lg w-full mx-4 transition-all duration-200 ${
-                            visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                            visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
                         }`}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex justify-end mb-12">
-                            <Button onClick={close} className="p-2! text-sm bg-inherit"><X width={30} height={30}/></Button>
+                            <Button onClick={close} className="p-2! text-sm bg-inherit">
+                                <X width={30} height={30} />
+                            </Button>
                         </div>
                         {typeof children === "function" ? children(close) : children}
                     </div>

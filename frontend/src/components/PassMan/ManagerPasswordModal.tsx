@@ -1,5 +1,5 @@
-import { Button } from "../Button/Button";
-import { Input } from "../Input/Input";
+import { Button } from "../Button";
+import { Input } from "../Input";
 
 type ManagerPasswordModalProps = {
     value: string;
@@ -15,8 +15,7 @@ export const ManagerPasswordModal = ({
     onChange,
     onConfirm,
     onClose,
-}: ManagerPasswordModalProps) =>
-{
+}: ManagerPasswordModalProps) => {
     return (
         <div
             className="fixed inset-0 bg-overlay flex items-center justify-center z-50"
@@ -24,12 +23,10 @@ export const ManagerPasswordModal = ({
         >
             <div
                 className="bg-surface rounded-xl px-4 py-6 md:px-6 w-full max-w-lg mx-4"
-                onClick={event => event.stopPropagation()}
+                onClick={(event) => event.stopPropagation()}
             >
                 <div className="flex flex-col gap-5">
-                    <div className="text-text text-2xl">
-                        {title}
-                    </div>
+                    <div className="text-text text-2xl">{title}</div>
 
                     <Input
                         value={value}
@@ -40,16 +37,11 @@ export const ManagerPasswordModal = ({
                     />
 
                     <div className="flex justify-end gap-3">
-                        <Button
-                            onClick={onClose}
-                            className="bg-transparent!"
-                        >
+                        <Button onClick={onClose} className="bg-transparent!">
                             Cancel
                         </Button>
 
-                        <Button onClick={onConfirm}>
-                            Confirm
-                        </Button>
+                        <Button onClick={onConfirm}>Confirm</Button>
                     </div>
                 </div>
             </div>

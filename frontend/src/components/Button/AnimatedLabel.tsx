@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
-type AnimatedLabelProps =
-{
-    text: string; 
+type AnimatedLabelProps = {
+    text: string;
     error?: boolean;
     className?: string;
     splitColor?: boolean;
-}
+};
 
 export const AnimatedLabel = ({ text, error, className, splitColor }: AnimatedLabelProps) => {
     const [displayed, setDisplayed] = useState(text);
@@ -31,9 +30,9 @@ export const AnimatedLabel = ({ text, error, className, splitColor }: AnimatedLa
             } else {
                 let i = 0;
                 const type = () => {
-                    if (i > next.length) { 
+                    if (i > next.length) {
                         setTyping(false);
-                        return; 
+                        return;
                     }
                     setDisplayed(next.slice(0, i));
                     i++;
@@ -43,31 +42,36 @@ export const AnimatedLabel = ({ text, error, className, splitColor }: AnimatedLa
             }
         };
 
-        setDisplayed((cur) => { tick(cur, text); return cur; });
+        setDisplayed((cur) => {
+            tick(cur, text);
+            return cur;
+        });
 
-        return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
     }, [text]);
 
     const words = displayed.split(/([\s-])/g).filter(Boolean);
     const mid = Math.ceil(words.length / 2);
 
     return (
-        <span className={`font-bold uppercase ${error ? 'text-accent' : ''} ${className}`}>
+        <span className={`font-bold uppercase ${error ? "text-accent" : ""} ${className}`}>
             {splitColor ? (
                 <span className="inline">
                     {words.map((word, i) => (
-                        <span 
+                        <span
                             key={i}
-                            className={`transition-colors duration-700 ${i < mid ? 'text-accent' : 'text-primary'}`}
+                            className={`transition-colors duration-700 ${i < mid ? "text-accent" : "text-primary"}`}
                         >
                             {word}
                         </span>
                     ))}
                 </span>
             ) : (
-                displayed || '\u00A0'
+                displayed || "\u00A0"
             )}
-            {typing && <span style={{ animation: 'blink 0.2s step-start infinite' }}>|</span>}
+            {typing && <span style={{ animation: "blink 0.2s step-start infinite" }}>|</span>}
             <style>{`@keyframes blink { 0%, 100% { opacity: 1 } 50% { opacity: 0 } }`}</style>
         </span>
     );

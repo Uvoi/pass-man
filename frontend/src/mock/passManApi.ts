@@ -1,9 +1,5 @@
-
-
-import type { EncryptedData, PassItem } from "../types/pass";
-import {
-    encryptPassItems,
-} from "../utils/crypto";
+import type { EncryptedData, PassItem } from "../types";
+import { encryptPassItems } from "../utils";
 
 const MOCK_MANAGER_PASSWORD = "manager123";
 
@@ -33,14 +29,11 @@ const mockItems: PassItem[] = [
             },
 
             charsetGroups: {
-                letters:
-                    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+                letters: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
 
-                digits:
-                    "0123456789",
+                digits: "0123456789",
 
-                special:
-                    "!@#$%^&*",
+                special: "!@#$%^&*",
             },
 
             customAlphabet: "",
@@ -66,14 +59,11 @@ const mockItems: PassItem[] = [
             },
 
             charsetGroups: {
-                letters:
-                    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+                letters: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
 
-                digits:
-                    "0123456789",
+                digits: "0123456789",
 
-                special:
-                    "!@#$%^&*",
+                special: "!@#$%^&*",
             },
 
             customAlphabet: "",
@@ -99,14 +89,11 @@ const mockItems: PassItem[] = [
             },
 
             charsetGroups: {
-                letters:
-                    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+                letters: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
 
-                digits:
-                    "0123456789",
+                digits: "0123456789",
 
-                special:
-                    "!@#$%^&*",
+                special: "!@#$%^&*",
             },
 
             customAlphabet: "",
@@ -116,26 +103,18 @@ const mockItems: PassItem[] = [
 
 let encryptedData: EncryptedData;
 
-const initialize = async () =>
-{
-    encryptedData = await encryptPassItems(
-        mockItems,
-        MOCK_MANAGER_PASSWORD,
-    );
+const initialize = async () => {
+    encryptedData = await encryptPassItems(mockItems, MOCK_MANAGER_PASSWORD);
 };
 
 const initialized = initialize();
 
-export const getPassManData = async (): Promise<EncryptedData> =>
-{
+export const getPassManData = async (): Promise<EncryptedData> => {
     await initialized;
 
     return encryptedData;
 };
 
-export const savePassManData = async (
-    data: EncryptedData,
-) =>
-{
+export const savePassManData = async (data: EncryptedData) => {
     encryptedData = data;
 };
