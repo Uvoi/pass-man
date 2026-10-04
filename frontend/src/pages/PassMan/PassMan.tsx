@@ -1,98 +1,105 @@
 import { useEffect, useState } from "react";
 
+import { CustomAlphabetModal } from "../../components/PassMan/CustomAlphabetModal";
+import { EditPassModal } from "../../components/PassMan/EditPassModal";
+import { MasterKeyModal } from "../../components/PassMan/MasterKeyModal";
+import { ManagerPasswordModal } from "../../components/PassMan/ManagerPasswordModal";
+import { PassContextMenu } from "../../components/PassMan/PassContextMenu";
+import { PassManHeader } from "../../components/PassMan/PassManHeader";
+import { PassManTable } from "../../components/PassMan/PassManTable";
 
+import type { PassItem } from "../../types/pass";
 
 import {
-    getPassManData,
-    mockMasterKeys,
-    savePassManData,
-} from "../../mock/passManApi";
+    usePassMan,
+} from "./usePassMan";
 
-import { decryptPassItems, encryptPassItems } from "../../utils/crypto";
+import {
+    usePassManActions,
+} from "./usePassManActions";
 
-import { PassRow } from "../../components/PassMan/PassRow";
-import { MasterKeyModal } from "../../components/PassMan/MasterKeyModal";
-import { CustomAlphabetModal } from "../../components/PassMan/CustomAlphabetModal";
-import { ManagerPasswordModal } from "../../components/PassMan/ManagerPasswordModal";
-import { EditPassModal } from "../../components/PassMan/EditPassModal";
-import { PassContextMenu } from "../../components/PassMan/PassContextMenu";
+import {
+    usePassManAuth,
+} from "./usePassManAuth";
 
-import { useManagerSession } from "./useManagerSession";
-import type { AuthAction, PassItem } from "../../types/pass";
+import type {
+    ContextMenuState,
+} from "./types";
 
-type ContextMenuState = {
-    x: number;
-    y: number;
-    item: PassItem;
-} | null;
+import { useManagerSession } from "../../context/ManagerSessionContext";
+
 
 export const PassMan = () =>
 {
-    const [passwords, setPasswords] = useState<PassItem[]>([]);
-    const [loading, setLoading] = useState(true);
-
     const {
         managerPassword,
         isAuthenticated,
         startSession,
     } = useManagerSession();
 
-    const [managerModalOpen, setManagerModalOpen] = useState(false);
-    const [managerInput, setManagerInput] = useState("");
-    
 
-    const [generatedPasswords, setGeneratedPasswords] =
-        useState<Record<number, string>>({});
+    const {
+        passwords,
+        loading,
+        generatedPasswords,
+        setGeneratedPasswords,
+        loadData,
+        saveData,
+    } = usePassMan({
+        managerPassword,
+        startSession,
+    });
 
-    const [authItem, setAuthItem] =
-        useState<PassItem | null>(null);
 
-    const [authAction, setAuthAction] =
-        useState<AuthAction | null>(null);
+    const {
+        handleDelete,
+        handleEdit,
+    } = usePassManActions({
+        passwords,
+        setGeneratedPasswords,
+        saveData,
+    });
 
-    const [masterKey, setMasterKey] = useState("");
-    const [authError, setAuthError] = useState(false);
+
+    const {
+        authItem,
+        masterKey,
+        authError,
+        setMasterKey,
+        handleAuth,
+        handleView,
+        handleCopy,
+        closeAuthModal,
+    } = usePassManAuth({
+        generatedPasswords,
+        setGeneratedPasswords,
+    });
+
+
+    const [managerModalOpen, setManagerModalOpen] =
+        useState(false);
+
+    const [managerInput, setManagerInput] =
+        useState("");
+
 
     const [customAlphabetItem, setCustomAlphabetItem] =
         useState<PassItem | null>(null);
 
+
     const [contextMenu, setContextMenu] =
         useState<ContextMenuState>(null);
+
 
     const [editItem, setEditItem] =
         useState<PassItem | null>(null);
 
-    const loadData = async (password: string) =>
-    {
-        setLoading(true);
-
-        try
-        {
-            const encrypted = await getPassManData();
-
-            const decrypted = await decryptPassItems(
-                encrypted,
-                password,
-            );
-
-            setPasswords(decrypted);
-            setGeneratedPasswords({});
-
-            startSession(password);
-
-            setManagerModalOpen(false);
-            setManagerInput("");
-        }
-        finally
-        {
-            setLoading(false);
-        }
-    };
 
     useEffect(() =>
     {
         setManagerModalOpen(true);
     }, []);
+
 
     useEffect(() =>
     {
@@ -101,191 +108,46 @@ export const PassMan = () =>
             setGeneratedPasswords({});
             setManagerModalOpen(true);
         }
-    }, [isAuthenticated]);
+    }, [
+        isAuthenticated,
+        setGeneratedPasswords,
+    ]);
 
-    const generatePassword = async (
+
+    const handleManagerPasswordConfirm = async () =>
+    {
+        await loadData(managerInput);
+
+        setManagerModalOpen(false);
+        setManagerInput("");
+    };
+
+
+    const handleManagerPasswordClose = () =>
+    {
+        if (isAuthenticated)
+        {
+            setManagerModalOpen(false);
+        }
+    };
+
+
+    const handleDeleteItem = async (item: PassItem) =>
+    {
+        await handleDelete(item);
+
+        setContextMenu(null);
+    };
+
+
+    const handleEditItem = (
         item: PassItem,
-        masterKey: string,
     ) =>
     {
-        const { getPassword } =
-            await import("../../components/Generate/generate");
-
-        return getPassword(
-            masterKey,
-            item.key,
-            item.tag,
-            item.params,
-        );
+        setEditItem(item);
+        setContextMenu(null);
     };
 
-    const openAuthModal = (
-        item: PassItem,
-        action: AuthAction,
-    ) =>
-    {
-        setAuthItem(item);
-        setAuthAction(action);
-        setMasterKey("");
-        setAuthError(false);
-    };
-
-    const closeAuthModal = () =>
-    {
-        setAuthItem(null);
-        setAuthAction(null);
-        setMasterKey("");
-        setAuthError(false);
-    };
-
-    const handleAuth = async () =>
-    {
-        if (!authItem || !authAction)
-        {
-            return;
-        }
-
-        const expectedMasterKey =
-            mockMasterKeys[authItem.id];
-
-        if (
-            expectedMasterKey === undefined ||
-            masterKey !== expectedMasterKey
-        )
-        {
-            setAuthError(true);
-            return;
-        }
-
-        try
-        {
-            const password = await generatePassword(
-                authItem,
-                masterKey,
-            );
-
-            if (authAction === "view")
-            {
-                setGeneratedPasswords(prev => ({
-                    ...prev,
-                    [authItem.id]: password,
-                }));
-            }
-
-            if (authAction === "copy")
-            {
-                await navigator.clipboard.writeText(password);
-            }
-
-            closeAuthModal();
-        }
-        catch
-        {
-            setAuthError(true);
-        }
-    };
-
-    const handleView = (item: PassItem) =>
-    {
-        if (generatedPasswords[item.id])
-        {
-            setGeneratedPasswords(prev =>
-            {
-                const next = { ...prev };
-
-                delete next[item.id];
-
-                return next;
-            });
-
-            return;
-        }
-
-        openAuthModal(item, "view");
-    };
-
-    const handleCopy = async (item: PassItem) =>
-    {
-        const password = generatedPasswords[item.id];
-
-        if (password)
-        {
-            await navigator.clipboard.writeText(password);
-
-            return;
-        }
-
-        openAuthModal(item, "copy");
-    };
-
-    const saveData = async (items: PassItem[]) =>
-    {
-        if (!managerPassword)
-        {
-            setManagerModalOpen(true);
-
-            return;
-        }
-
-        const encrypted = await encryptPassItems(
-            items,
-            managerPassword,
-        );
-
-        await savePassManData(encrypted);
-
-        setPasswords(items);
-    };
-
-    const handleDelete = async (item: PassItem) =>
-    {
-        const next = passwords.filter(
-            password => password.id !== item.id,
-        );
-
-        setGeneratedPasswords(prev =>
-        {
-            const nextPasswords = { ...prev };
-
-            delete nextPasswords[item.id];
-
-            return nextPasswords;
-        });
-
-        await saveData(next);
-    };
-
-    const handleEdit = async (
-        item: PassItem,
-        key: string,
-        tag: string,
-        params: PassItem["params"],
-    ) =>
-    {
-        const next = passwords.map(password =>
-            password.id === item.id
-                ? {
-                    ...password,
-                    key,
-                    tag,
-                    params,
-                }
-                : password,
-        );
-
-        setGeneratedPasswords(prev =>
-        {
-            const nextPasswords = { ...prev };
-
-            delete nextPasswords[item.id];
-
-            return nextPasswords;
-        });
-
-        await saveData(next);
-
-        setEditItem(null);
-    };
 
     return (
         <div
@@ -298,112 +160,43 @@ export const PassMan = () =>
                 setContextMenu(null);
             }}
         >
-            <div className="mb-6 flex items-center justify-between">
-                <div className="text-text text-2xl">
-                    Passwords
-                </div>
+            <PassManHeader
+                isAuthenticated={isAuthenticated}
+                onChangeManagerPassword={() =>
+                {
+                    setManagerModalOpen(true);
+                    setManagerInput("");
+                }}
+            />
 
-                {isAuthenticated && (
-                    <button
-                        type="button"
-                        onClick={(event) =>
-                        {
-                            event.stopPropagation();
 
-                            setManagerModalOpen(true);
-                            setManagerInput("");
-                        }}
-                        className="text-text hover:text-accent"
-                    >
-                        Change manager password
-                    </button>
-                )}
-            </div>
+            <PassManTable
+                loading={loading}
+                passwords={passwords}
+                generatedPasswords={generatedPasswords}
+                onView={handleView}
+                onCopy={handleCopy}
+                onCustomAlphabet={setCustomAlphabetItem}
+                onContextMenu={(x, y, item) =>
+                {
+                    setContextMenu({
+                        x,
+                        y,
+                        item,
+                    });
+                }}
+            />
 
-            {loading && (
-                <div className="text-text/50">
-                    Loading...
-                </div>
-            )}
-
-            {!loading && (
-                <div
-                    className="
-                        w-full overflow-hidden
-                        rounded-xl border-2 border-border
-                    "
-                >
-                    <div
-                        className="
-                            hidden md:grid
-                            grid-cols-[1fr_1fr_2fr_2fr]
-                            gap-4
-                            px-6 py-4
-                            bg-surface
-                            text-text
-                            font-semibold
-                        "
-                    >
-                        <div>
-                            Key
-                        </div>
-
-                        <div>
-                            Tag
-                        </div>
-
-                        <div>
-                            Password
-                        </div>
-
-                        <div>
-                            Parameters
-                        </div>
-                    </div>
-
-                    <div className="divide-y-2 divide-border">
-                        {passwords.map(item => (
-                            <PassRow
-                                key={item.id}
-                                item={item}
-                                password={generatedPasswords[item.id]}
-                                onView={() => handleView(item)}
-                                onCopy={() => handleCopy(item)}
-                                onCustomAlphabet={() =>
-                                    setCustomAlphabetItem(item)
-                                }
-                                onContextMenu={(x, y) =>
-                                    setContextMenu({
-                                        x,
-                                        y,
-                                        item,
-                                    })
-                                }
-                            />
-                        ))}
-                    </div>
-                </div>
-            )}
 
             {managerModalOpen && (
                 <ManagerPasswordModal
                     value={managerInput}
-                    onChange={value =>
-                    {
-                        setManagerInput(value);
-                    }}
-                    onConfirm={() =>
-                        loadData(managerInput)
-                    }
-                    onClose={() =>
-                    {
-                        if (isAuthenticated)
-                        {
-                            setManagerModalOpen(false);
-                        }
-                    }}
+                    onChange={setManagerInput}
+                    onConfirm={handleManagerPasswordConfirm}
+                    onClose={handleManagerPasswordClose}
                 />
             )}
+
 
             {authItem && (
                 <MasterKeyModal
@@ -416,44 +209,58 @@ export const PassMan = () =>
                 />
             )}
 
+
             {customAlphabetItem?.params.customAlphabet && (
                 <CustomAlphabetModal
-                    value={customAlphabetItem.params.customAlphabet}
+                    value={
+                        customAlphabetItem.params.customAlphabet
+                    }
                     onClose={() =>
                         setCustomAlphabetItem(null)
                     }
                 />
             )}
 
+
             {editItem && (
                 <EditPassModal
                     item={editItem}
-                    onSave={(key, tag, params) =>
+                    onSave={(
+                        key,
+                        tag,
+                        params,
+                    ) =>
+                    {
                         handleEdit(
                             editItem,
                             key,
                             tag,
                             params,
-                        )
+                        );
+
+                        setEditItem(null);
+                    }}
+                    onClose={() =>
+                        setEditItem(null)
                     }
-                    onClose={() => setEditItem(null)}
                 />
             )}
+
 
             {contextMenu && (
                 <PassContextMenu
                     x={contextMenu.x}
                     y={contextMenu.y}
                     onEdit={() =>
-                    {
-                        setEditItem(contextMenu.item);
-                        setContextMenu(null);
-                    }}
+                        handleEditItem(
+                            contextMenu.item,
+                        )
+                    }
                     onDelete={() =>
-                    {
-                        handleDelete(contextMenu.item);
-                        setContextMenu(null);
-                    }}
+                        handleDeleteItem(
+                            contextMenu.item,
+                        )
+                    }
                 />
             )}
         </div>
