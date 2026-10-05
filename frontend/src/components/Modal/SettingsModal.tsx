@@ -11,6 +11,7 @@ type SettingsModalProps = {
     settings: GenerateSettings;
     onChange: (s: GenerateSettings) => void;
     disabled?: boolean;
+    className?: string;
 };
 
 const charsetKeys = Object.keys(defaultCharsetGroups) as CharsetGroupKey[];
@@ -75,7 +76,7 @@ const CharsetEditModal = ({ label, chars, onChange }: CharsetEditModalProps) => 
     );
 };
 
-export const SettingsModal = ({ settings, onChange, disabled }: SettingsModalProps) => {
+export const SettingsModal = ({ settings, onChange, disabled, className }: SettingsModalProps) => {
     const [local, setLocal] = useState(settings);
 
     const update = (key: keyof GenerateSettings, value: number) =>
@@ -122,6 +123,7 @@ export const SettingsModal = ({ settings, onChange, disabled }: SettingsModalPro
             }
             onOpen={() => setLocal(settings)}
             disabled={disabled}
+            className={className}
         >
             {(close) => (
                 <div className="flex flex-col gap-12">

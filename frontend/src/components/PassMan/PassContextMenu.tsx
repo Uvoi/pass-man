@@ -29,7 +29,7 @@ export const PassContextMenu = ({ x, y, onEdit, onDelete }: PassContextMenuProps
             <button
                 type="button"
                 onClick={onDelete}
-                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-text hover:bg-primary hover:text-error"
+                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-text hover:bg-primary hover:text-accent"
             >
                 <Trash2 size={18} />
                 Delete

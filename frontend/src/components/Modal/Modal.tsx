@@ -8,9 +8,10 @@ type ModalProps = {
     children: ((close: () => void) => React.ReactNode) | React.ReactNode;
     onOpen?: () => void;
     disabled?: boolean;
+    className?: string;
 };
 
-export const Modal = ({ trigger, children, onOpen, disabled }: ModalProps) => {
+export const Modal = ({ trigger, children, onOpen, disabled, className }: ModalProps) => {
     const [open, setOpen] = useState(false);
     const [visible, setVisible] = useState(false);
 
@@ -38,9 +39,12 @@ export const Modal = ({ trigger, children, onOpen, disabled }: ModalProps) => {
 
             {open && (
                 <div
-                    className={`fixed inset-0 bg-overlay flex items-center justify-center z-50 transition-opacity duration-200 ${
-                        visible ? "opacity-100" : "opacity-0"
-                    }`}
+                    className=
+                    {
+                        `fixed inset-0 bg-overlay flex items-center justify-center z-50 transition-opacity duration-200 
+                        ${visible ? "opacity-100" : "opacity-0"}
+                        ${className}`
+                    }
                     onClick={close}
                 >
                     <div

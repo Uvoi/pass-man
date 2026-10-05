@@ -51,7 +51,7 @@ export const PassGenActions = ({
                     )}
                 </Button>
 
-                <SettingsModal settings={settings} onChange={onSettingsChange} disabled={loading} />
+                <SettingsModal settings={settings} onChange={onSettingsChange} disabled={loading} className="z-100"/>
 
                 <Button
                     onClick={onReset}
@@ -69,25 +69,22 @@ export const PassGenActions = ({
                 </Button>
             </div>
 
-            <label
-                className="
-                    flex
-                    items-center
-                    gap-2
-                    text-text
-                    cursor-pointer
-                    select-none
-                "
-            >
+            <div className="flex items-center gap-3 rounded-lg border-2 border-border px-3 py-2">
                 <input
+                    id="add-to-pass-man"
                     type="checkbox"
                     checked={addToPassMan}
                     onChange={(event) => onAddToPassManChange(event.target.checked)}
                     disabled={loading}
-                    className="accent-accent"
+                    className="h-5 w-5 accent-primary"
                 />
-                Add to PassMan
-            </label>
+                <label
+                    htmlFor="add-to-pass-man"
+                    className="min-w-0 flex-1 text-xl text-text cursor-pointer select-none"
+                >
+                    Add to PassMan
+                </label>
+            </div>
         </div>
     );
 };

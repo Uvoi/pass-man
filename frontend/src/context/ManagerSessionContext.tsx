@@ -1,4 +1,4 @@
-import { type ReactNode,useEffect, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import { ManagerSessionContext } from "./managerSessionContext.ts";
 
@@ -7,39 +7,37 @@ const SESSION_TIME = 5 * 60 * 1000;
 export const ManagerSessionProvider = ({ children }: { children: ReactNode }) => {
     const [managerPassword, setManagerPassword] = useState<string | null>(null);
 
-    const [timer, setTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const clearSession = () => {
+    const clearSession = useCallback(() => {
         setManagerPassword(null);
 
-        if (timer) {
-            clearTimeout(timer);
-            setTimer(null);
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
         }
-    };
+    }, []);
 
-    const startSession = (password: string) => {
-        if (timer) {
-            clearTimeout(timer);
+    const startSession = useCallback((password: string) => {
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
         }
 
         setManagerPassword(password);
 
-        const nextTimer = setTimeout(() => {
+        timerRef.current = setTimeout(() => {
             setManagerPassword(null);
-            setTimer(null);
+            timerRef.current = null;
         }, SESSION_TIME);
-
-        setTimer(nextTimer);
-    };
+    }, []);
 
     useEffect(() => {
         return () => {
-            if (timer) {
-                clearTimeout(timer);
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
             }
         };
-    }, [timer]);
+    }, []);
 
     return (
         <ManagerSessionContext.Provider

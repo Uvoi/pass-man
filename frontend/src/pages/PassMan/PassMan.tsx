@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
     CustomAlphabetModal,
@@ -9,49 +9,31 @@ import {
     PassManHeader,
     PassManTable,
 } from "../../components/PassMan";
-
+import { useManagerSession } from "../../context/useManagerSession";
 import type { PassItem } from "../../types";
-
+import type { ContextMenuState } from "./types";
 import { usePassMan } from "./usePassMan";
 import { usePassManActions } from "./usePassManActions";
 import { usePassManAuth } from "./usePassManAuth";
 
-import type { ContextMenuState } from "./types";
+type PassManProps = {
+    isActive: boolean;
+};
 
-import { useManagerSession } from "../../context/useManagerSession";
+export const PassMan = ({ isActive }: PassManProps) => {
+    const { managerPassword, isAuthenticated, startSession } = useManagerSession();
 
+    const { passwords, loading, generatedPasswords, setGeneratedPasswords, loadData, saveData } =
+        usePassMan({
+            managerPassword,
+            startSession,
+        });
 
-export const PassMan = () =>
-{
-    const {
-        managerPassword,
-        isAuthenticated,
-        startSession,
-    } = useManagerSession();
-
-
-    const {
-        passwords,
-        loading,
-        generatedPasswords,
-        setGeneratedPasswords,
-        loadData,
-        saveData,
-    } = usePassMan({
-        managerPassword,
-        startSession,
-    });
-
-
-    const {
-        handleDelete,
-        handleEdit,
-    } = usePassManActions({
+    const { handleDelete, handleEdit } = usePassManActions({
         passwords,
         setGeneratedPasswords,
         saveData,
     });
-
 
     const {
         authItem,
@@ -67,72 +49,66 @@ export const PassMan = () =>
         setGeneratedPasswords,
     });
 
+    const [managerModalOpen, setManagerModalOpen] = useState(false);
 
-    const [managerModalOpen, setManagerModalOpen] =
-        useState(false);
+    const [managerInput, setManagerInput] = useState("");
 
-    const [managerInput, setManagerInput] =
-        useState("");
+    const [customAlphabetItem, setCustomAlphabetItem] = useState<PassItem | null>(null);
 
+    const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
 
-    const [customAlphabetItem, setCustomAlphabetItem] =
-        useState<PassItem | null>(null);
+    const [editItem, setEditItem] = useState<PassItem | null>(null);
 
+    const wasActive = useRef(false);
 
-    const [contextMenu, setContextMenu] =
-        useState<ContextMenuState>(null);
+    useEffect(() => {
+        if (!isActive) {
+            wasActive.current = false;
+            return;
+        }
 
+        if (wasActive.current) {
+            return;
+        }
 
-    const [editItem, setEditItem] =
-        useState<PassItem | null>(null);
+        wasActive.current = true;
 
+        if (managerPassword) {
+            void loadData(managerPassword, false).catch((error: unknown) => {
+                console.error("Failed to refresh PassMan data", error);
+            });
+        }
+    }, [isActive, loadData, managerPassword]);
 
-    useEffect(() =>
-    {
-        if (!isAuthenticated)
-        {
+    useEffect(() => {
+        if (!isAuthenticated) {
             setGeneratedPasswords({});
         }
-    }, [
-        isAuthenticated,
-        setGeneratedPasswords,
-    ]);
+    }, [isAuthenticated, setGeneratedPasswords]);
 
-
-    const handleManagerPasswordConfirm = async () =>
-    {
+    const handleManagerPasswordConfirm = async () => {
         await loadData(managerInput);
 
         setManagerModalOpen(false);
         setManagerInput("");
     };
 
-
-    const handleManagerPasswordClose = () =>
-    {
-        if (isAuthenticated)
-        {
+    const handleManagerPasswordClose = () => {
+        if (isAuthenticated) {
             setManagerModalOpen(false);
         }
     };
 
-
-    const handleDeleteItem = async (item: PassItem) =>
-    {
+    const handleDeleteItem = async (item: PassItem) => {
         await handleDelete(item);
 
         setContextMenu(null);
     };
 
-
-    const handleEditItem = (
-        item: PassItem,
-    ) =>
-    {
+    const handleEditItem = (item: PassItem) => {
         setEditItem(item);
         setContextMenu(null);
     };
-
 
     return (
         <div
@@ -140,20 +116,17 @@ export const PassMan = () =>
                 bg-bg min-h-screen w-full flex flex-col
                 py-8 px-4 md:px-5 lg:px-30 xl:px-26
             "
-            onClick={() =>
-            {
+            onClick={() => {
                 setContextMenu(null);
             }}
         >
             <PassManHeader
                 isAuthenticated={isAuthenticated}
-                onChangeManagerPassword={() =>
-                {
+                onChangeManagerPassword={() => {
                     setManagerModalOpen(true);
                     setManagerInput("");
                 }}
             />
-
 
             <PassManTable
                 loading={loading}
@@ -162,8 +135,7 @@ export const PassMan = () =>
                 onView={handleView}
                 onCopy={handleCopy}
                 onCustomAlphabet={setCustomAlphabetItem}
-                onContextMenu={(x, y, item) =>
-                {
+                onContextMenu={(x, y, item) => {
                     setContextMenu({
                         x,
                         y,
@@ -171,7 +143,6 @@ export const PassMan = () =>
                     });
                 }}
             />
-
 
             {(managerModalOpen || !isAuthenticated) && (
                 <ManagerPasswordModal
@@ -181,7 +152,6 @@ export const PassMan = () =>
                     onClose={handleManagerPasswordClose}
                 />
             )}
-
 
             {authItem && (
                 <MasterKeyModal
@@ -194,58 +164,31 @@ export const PassMan = () =>
                 />
             )}
 
-
             {customAlphabetItem?.params.customAlphabet && (
                 <CustomAlphabetModal
-                    value={
-                        customAlphabetItem.params.customAlphabet
-                    }
-                    onClose={() =>
-                        setCustomAlphabetItem(null)
-                    }
+                    value={customAlphabetItem.params.customAlphabet}
+                    onClose={() => setCustomAlphabetItem(null)}
                 />
             )}
-
 
             {editItem && (
                 <EditPassModal
                     item={editItem}
-                    onSave={(
-                        key,
-                        tag,
-                        params,
-                    ) =>
-                    {
-                        handleEdit(
-                            editItem,
-                            key,
-                            tag,
-                            params,
-                        );
+                    onSave={(key, tag, params) => {
+                        handleEdit(editItem, key, tag, params);
 
                         setEditItem(null);
                     }}
-                    onClose={() =>
-                        setEditItem(null)
-                    }
+                    onClose={() => setEditItem(null)}
                 />
             )}
-
 
             {contextMenu && (
                 <PassContextMenu
                     x={contextMenu.x}
                     y={contextMenu.y}
-                    onEdit={() =>
-                        handleEditItem(
-                            contextMenu.item,
-                        )
-                    }
-                    onDelete={() =>
-                        handleDeleteItem(
-                            contextMenu.item,
-                        )
-                    }
+                    onEdit={() => handleEditItem(contextMenu.item)}
+                    onDelete={() => handleDeleteItem(contextMenu.item)}
                 />
             )}
         </div>

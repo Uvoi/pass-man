@@ -28,7 +28,7 @@ export const Title = ({ trigger, defaultText }: TitleProps) => {
             clearTimeout(phraseTimer);
             clearTimeout(resetTimer);
         };
-    }, [trigger]);
+    }, [defaultText, trigger]);
 
     return (
         <AnimatedLabel

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { getPassManData, savePassManData } from "../../api";
 import type { PassItem } from "../../types/pass";
@@ -15,22 +15,27 @@ export const usePassMan = ({ managerPassword, startSession }: UsePassManParams) 
 
     const [generatedPasswords, setGeneratedPasswords] = useState<Record<number, string>>({});
 
-    const loadData = async (password: string) => {
-        setLoading(true);
+    const loadData = useCallback(
+        async (password: string, renewSession = true) => {
+            setLoading(true);
 
-        try {
-            const encrypted = await getPassManData();
+            try {
+                const encrypted = await getPassManData();
 
-            const decrypted = await decryptPassItems(encrypted, password);
+                const decrypted = await decryptPassItems(encrypted, password);
 
-            setPasswords(decrypted);
-            setGeneratedPasswords({});
+                setPasswords(decrypted);
+                setGeneratedPasswords({});
 
-            startSession(password);
-        } finally {
-            setLoading(false);
-        }
-    };
+                if (renewSession) {
+                    startSession(password);
+                }
+            } finally {
+                setLoading(false);
+            }
+        },
+        [startSession],
+    );
 
     const saveData = async (items: PassItem[]) => {
         if (!managerPassword) {

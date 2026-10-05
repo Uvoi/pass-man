@@ -29,7 +29,7 @@ export const EditPassModal = ({ item, onSave, onClose }: EditPassModalProps) => 
 
     return (
         <div
-            className="fixed inset-0 bg-overlay flex items-center justify-center z-50"
+            className="fixed inset-0 bg-overlay flex items-center justify-center z-100"
             onClick={onClose}
         >
             <div
@@ -49,7 +49,7 @@ export const EditPassModal = ({ item, onSave, onClose }: EditPassModalProps) => 
 
                     <Input value={tag} onChange={setTag} placeholder="Tag" rightAddon="clear" />
 
-                    <SettingsModal settings={params} onChange={setParams} />
+                    <SettingsModal settings={params} onChange={setParams}/>
 
                     <div className="flex justify-end gap-3">
                         <Button onClick={onClose} className="bg-transparent!">
