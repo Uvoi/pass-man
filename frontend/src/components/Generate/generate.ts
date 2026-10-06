@@ -2,7 +2,12 @@ import { argon2id } from "hash-wasm";
 
 const getNormalized = (value: string) => value.trim();
 
-const getSalt = (normalizedKey: string, tag: string) => `${normalizedKey}:${tag || "default"}:v1`;
+const getSalt = (normalizedKey: string, tag: string) => {
+    const salt = `${normalizedKey}:${tag || "default"}:v1`;
+    const byteLength = new TextEncoder().encode(salt).byteLength;
+
+    return byteLength < 8 ? salt.padEnd(salt.length + 8 - byteLength, "0") : salt;
+};
 
 export type ArgonParams = {
     iterations: number;

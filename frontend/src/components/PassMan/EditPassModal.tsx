@@ -49,7 +49,7 @@ export const EditPassModal = ({ item, onSave, onClose }: EditPassModalProps) => 
 
                     <Input value={tag} onChange={setTag} placeholder="Tag" rightAddon="clear" />
 
-                    <SettingsModal settings={params} onChange={setParams}/>
+                    <SettingsModal settings={params} onChange={setParams} />
 
                     <div className="flex justify-end gap-3">
                         <Button onClick={onClose} className="bg-transparent!">

@@ -51,7 +51,12 @@ export const PassGenActions = ({
                     )}
                 </Button>
 
-                <SettingsModal settings={settings} onChange={onSettingsChange} disabled={loading} className="z-100"/>
+                <SettingsModal
+                    settings={settings}
+                    onChange={onSettingsChange}
+                    disabled={loading}
+                    className="z-100"
+                />
 
                 <Button
                     onClick={onReset}
