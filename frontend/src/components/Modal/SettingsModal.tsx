@@ -53,6 +53,7 @@ const CharsetEditModal = ({ label, chars, onChange }: CharsetEditModalProps) => 
                 </Button>
             }
             onOpen={() => setValue(charsToEditValue(chars))}
+            onConfirm={handleApply}
         >
             {(close) => (
                 <div className="flex flex-col gap-6">
@@ -125,6 +126,8 @@ export const SettingsModal = ({ settings, onChange, disabled, className }: Setti
             onOpen={() => setLocal(settings)}
             disabled={disabled}
             className={className}
+            onConfirm={handleApply}
+            confirmDisabled={alphabetLength === 0}
         >
             {(close) => (
                 <div className="flex flex-col gap-12">

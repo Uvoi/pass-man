@@ -12,6 +12,7 @@ type InputProps = {
     type?: "text" | "password";
     disabled?: boolean;
     error?: boolean;
+    autoFocus?: boolean;
 };
 
 export const Input = (props: InputProps) => {
@@ -24,6 +25,7 @@ export const Input = (props: InputProps) => {
         type = "text",
         disabled,
         error,
+        autoFocus,
     } = props;
     const addons = Array.isArray(rightAddon) ? rightAddon : rightAddon ? [rightAddon] : [];
 
@@ -48,6 +50,7 @@ export const Input = (props: InputProps) => {
                 placeholder={placeholder}
                 onChange={(e) => onChange?.(e?.target.value)}
                 disabled={disabled}
+                autoFocus={autoFocus}
             />
             <div className="flex w-fit">
                 {addons.includes("visible") && (

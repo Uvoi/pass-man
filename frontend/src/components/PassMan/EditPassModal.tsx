@@ -37,14 +37,37 @@ export const EditPassModal = ({ item, onSave, onClose }: EditPassModalProps) => 
         }
     };
 
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === "Escape") {
+            event.preventDefault();
+
+            if (!saving) onClose();
+
+            return;
+        }
+
+        if (
+            event.key === "Enter" &&
+            !event.nativeEvent.isComposing &&
+            !(event.target instanceof HTMLButtonElement)
+        ) {
+            event.preventDefault();
+
+            if (!saving) void handleSave();
+        }
+    };
+
     return (
         <div
             className="fixed inset-0 bg-overlay flex items-center justify-center z-100"
             onClick={onClose}
         >
             <div
+                role="dialog"
+                aria-modal="true"
                 className="bg-surface rounded-xl px-4 py-6 md:px-6 w-full max-w-lg mx-4"
                 onClick={(event) => event.stopPropagation()}
+                onKeyDown={handleKeyDown}
             >
                 <div className="flex flex-col gap-6">
                     <div className="text-text text-2xl">Edit password</div>
@@ -55,6 +78,7 @@ export const EditPassModal = ({ item, onSave, onClose }: EditPassModalProps) => 
                         placeholder="Key"
                         error={keyError}
                         rightAddon="clear"
+                        autoFocus
                     />
 
                     <Input value={tag} onChange={setTag} placeholder="Tag" rightAddon="clear" />

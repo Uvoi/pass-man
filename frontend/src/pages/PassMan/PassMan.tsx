@@ -49,7 +49,7 @@ export const PassMan = ({ isActive }: PassManProps) => {
         setGeneratedPasswords,
     });
 
-    const [managerModalOpen, setManagerModalOpen] = useState(false);
+    const [managerModalOpen, setManagerModalOpen] = useState(!isAuthenticated);
 
     const [managerInput, setManagerInput] = useState("");
 
@@ -103,10 +103,8 @@ export const PassMan = ({ isActive }: PassManProps) => {
     };
 
     const handleManagerPasswordClose = () => {
-        if (isAuthenticated) {
-            setManagerModalOpen(false);
-            setManagerError("");
-        }
+        setManagerModalOpen(false);
+        setManagerError("");
     };
 
     const handleDeleteItem = async (item: PassItem) => {
@@ -165,7 +163,7 @@ export const PassMan = ({ isActive }: PassManProps) => {
                 }}
             />
 
-            {(managerModalOpen || !isAuthenticated) && (
+            {managerModalOpen && (
                 <ManagerPasswordModal
                     value={managerInput}
                     error={managerError}
