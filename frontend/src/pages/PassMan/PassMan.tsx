@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
+import { exportNativeBackup, importNativeBackup, isNativeApp } from "../../api/nativeBackup";
 import {
     CustomAlphabetModal,
     EditPassModal,
@@ -60,6 +61,8 @@ export const PassMan = ({ isActive }: PassManProps) => {
     const [editItem, setEditItem] = useState<PassItem | null>(null);
 
     const [errorMessage, setErrorMessage] = useState("");
+    const [noticeMessage, setNoticeMessage] = useState("");
+    const [backupBusy, setBackupBusy] = useState(false);
 
     const [managerError, setManagerError] = useState("");
 
@@ -122,11 +125,53 @@ export const PassMan = ({ isActive }: PassManProps) => {
         setContextMenu(null);
     };
 
+    const handleExport = async () => {
+        setBackupBusy(true);
+        try {
+            const exported = await exportNativeBackup();
+            setNoticeMessage(exported ? "Backup exported" : "");
+            setErrorMessage("");
+        } catch (error) {
+            console.error("Failed to export PassMan backup", error);
+            setErrorMessage("Failed to export backup");
+        } finally {
+            setBackupBusy(false);
+        }
+    };
+
+    const handleImport = async () => {
+        if (
+            !window.confirm(
+                "Importing a backup will replace all current PassMan records. Continue?",
+            )
+        ) {
+            return;
+        }
+
+        setBackupBusy(true);
+        try {
+            const imported = await importNativeBackup();
+            if (imported === null) return;
+
+            setGeneratedPasswords({});
+            if (managerPassword) await loadData(managerPassword, false);
+            setNoticeMessage(`Imported ${imported} records`);
+            setErrorMessage("");
+        } catch (error) {
+            console.error("Failed to import PassMan backup", error);
+            setErrorMessage(
+                "Failed to import backup. Check that the file is a valid PassMan backup.",
+            );
+        } finally {
+            setBackupBusy(false);
+        }
+    };
+
     return (
         <div
             className="
                 bg-bg min-h-screen w-full flex flex-col
-                py-8 px-4 md:px-5 lg:px-30 xl:px-26
+                py-4 px-0 sm:py-8 sm:px-4 md:px-5 lg:px-30 xl:px-26
             "
             onClick={() => {
                 setContextMenu(null);
@@ -134,6 +179,9 @@ export const PassMan = ({ isActive }: PassManProps) => {
         >
             <PassManHeader
                 isAuthenticated={isAuthenticated}
+                busy={backupBusy}
+                onExport={isNativeApp ? handleExport : undefined}
+                onImport={isNativeApp ? handleImport : undefined}
                 onChangeManagerPassword={() => {
                     setManagerModalOpen(true);
                     setManagerInput("");
@@ -144,6 +192,12 @@ export const PassMan = ({ isActive }: PassManProps) => {
             {errorMessage && (
                 <div role="alert" className="mb-4 rounded-lg border border-error p-3 text-error">
                     {errorMessage}
+                </div>
+            )}
+
+            {noticeMessage && (
+                <div role="status" className="mb-4 rounded-lg border border-accent p-3 text-accent">
+                    {noticeMessage}
                 </div>
             )}
 

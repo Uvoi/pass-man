@@ -1,0 +1,14 @@
+**/node_modules/
+**/target/
+**/dist/
+
+desktop/artifacts/
+android/src-tauri/gen/schemas/
+android/src-tauri/gen/android/local.properties
+android/artifacts/
+
+*.jks
+*.keystore
+.env
+.env.*
+PassMan.data/

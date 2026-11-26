@@ -8,7 +8,7 @@ export const App = () => {
     const isPassManPage = searchParams.get("page") === "pass-man";
 
     return (
-        <div className="bg-bg min-h-screen w-full flex flex-col justify-center px-4">
+        <div className="app-shell bg-bg min-h-screen w-full flex flex-col justify-center px-4">
             <Header />
             <div className={isPassManPage ? "hidden" : "block"}>
                 <PassGen />

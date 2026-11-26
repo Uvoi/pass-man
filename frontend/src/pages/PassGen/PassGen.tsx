@@ -54,7 +54,7 @@ export const PassGen = () => {
             className="
                 bg-bg min-h-screen w-full
                 flex flex-col justify-center
-                py-8 px-4
+                py-4 px-0 sm:py-8 sm:px-4
                 md:px-28
                 lg:px-64
                 xl:px-60
@@ -66,7 +66,7 @@ export const PassGen = () => {
                 className="
                     flex flex-col gap-12
                     justify-center
-                    py-6 px-4
+                    py-6 px-3
                     bg-surface
                     rounded-xl
                     md:p-8

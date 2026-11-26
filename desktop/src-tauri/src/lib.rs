@@ -28,7 +28,7 @@ struct UpdatedPasswordItem {
     salt: String,
 }
 
-#[derive(Serialize)]
+#[derive(Deserialize, Serialize)]
 struct PasswordItem {
     id: i64,
     encrypted_data: String,
@@ -37,16 +37,22 @@ struct PasswordItem {
     created_at: String,
 }
 
+#[derive(Deserialize, Serialize)]
+struct PasswordBackup {
+    version: u32,
+    items: Vec<PasswordItem>,
+}
+
 fn with_connection<T>(
     database: State<'_, Database>,
-    operation: impl FnOnce(&Connection) -> rusqlite::Result<T>,
+    operation: impl FnOnce(&mut Connection) -> rusqlite::Result<T>,
 ) -> Result<T, String> {
-    let connection = database
+    let mut connection = database
         .0
         .lock()
         .map_err(|_| "The password database lock is poisoned".to_string())?;
 
-    operation(&connection).map_err(|error| error.to_string())
+    operation(&mut connection).map_err(|error| error.to_string())
 }
 
 fn portable_data_directory() -> Option<PathBuf> {
@@ -161,9 +167,63 @@ fn delete_password_item(database: State<'_, Database>, id: i64) -> Result<(), St
     })
 }
 
+#[tauri::command]
+fn export_password_items(database: State<'_, Database>) -> Result<String, String> {
+    let items = list_password_items(database)?;
+    serde_json::to_string_pretty(&PasswordBackup { version: 1, items })
+        .map_err(|error| error.to_string())
+}
+
+#[tauri::command]
+fn import_password_items(database: State<'_, Database>, contents: String) -> Result<usize, String> {
+    let backup: PasswordBackup =
+        serde_json::from_str(&contents).map_err(|error| error.to_string())?;
+
+    if backup.version != 1 {
+        return Err(format!(
+            "Unsupported PassMan backup version: {}",
+            backup.version
+        ));
+    }
+
+    if backup
+        .items
+        .iter()
+        .any(|item| item.encrypted_data.is_empty() || item.iv.is_empty() || item.salt.is_empty())
+    {
+        return Err("The backup contains an invalid password record".to_string());
+    }
+
+    let count = backup.items.len();
+    with_connection(database, |connection| {
+        let transaction = connection.transaction()?;
+        transaction.execute("DELETE FROM password_items", [])?;
+
+        for item in backup.items {
+            transaction.execute(
+                "INSERT INTO password_items (id, encrypted_data, iv, salt, created_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5)",
+                params![
+                    item.id,
+                    item.encrypted_data,
+                    item.iv,
+                    item.salt,
+                    item.created_at
+                ],
+            )?;
+        }
+
+        transaction.commit()
+    })?;
+
+    Ok(count)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .setup(|app| {
             let connection = Connection::open(database_path(app)?)?;
             connection.execute_batch(
@@ -186,6 +246,8 @@ pub fn run() {
             create_password_item,
             update_password_item,
             delete_password_item,
+            export_password_items,
+            import_password_items,
         ])
         .run(tauri::generate_context!())
         .expect("error while running PassMan desktop");

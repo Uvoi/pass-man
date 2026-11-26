@@ -38,7 +38,7 @@ export const PassRow = ({
                 grid
                 md:grid-cols-[1fr_1fr_2fr_2fr]
                 gap-4
-                px-6 py-5
+                px-4 py-5 sm:px-6
                 bg-bg
                 hover:bg-surface
                 transition-colors

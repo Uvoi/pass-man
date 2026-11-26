@@ -85,7 +85,7 @@ export const Modal = ({
 
             {open && (
                 <div
-                    className={`fixed inset-0 bg-overlay flex items-center justify-center z-50 transition-opacity duration-200 
+                    className={`fixed inset-0 bg-overlay flex items-center justify-center z-50 transition-opacity duration-200 px-[env(safe-area-inset-left)] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]
                         ${visible ? "opacity-100" : "opacity-0"}
                         ${className}`}
                     onClick={(event) => {
@@ -99,12 +99,12 @@ export const Modal = ({
                         role="dialog"
                         aria-modal="true"
                         tabIndex={-1}
-                        className={`max-h-[90vh] overflow-y-auto bg-surface rounded-xl px-4 py-4 md:px-6 min-w-80 max-w-lg w-full mx-4 transition-all duration-200 ${
+                        className={`max-h-[calc(100dvh-2rem)] overflow-y-auto bg-surface rounded-xl px-4 py-4 md:px-6 min-w-0 max-w-lg w-full mx-3 transition-all duration-200 ${
                             visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
                         }`}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex justify-end mb-12">
+                        <div className="sticky top-0 z-10 flex justify-end mb-6 bg-surface">
                             <Button onClick={close} className="p-2! text-sm bg-inherit">
                                 <X width={30} height={30} />
                             </Button>

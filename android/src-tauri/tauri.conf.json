@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "PassMan",
+  "version": "0.1.0",
+  "identifier": "io.github.passman.android",
+  "build": {
+    "beforeDevCommand": "pnpm --dir ../frontend dev --host 0.0.0.0 --port 1421 --strictPort",
+    "devUrl": "http://10.0.2.2:1421",
+    "beforeBuildCommand": "pnpm --dir ../frontend build",
+    "frontendDist": "../../frontend/dist"
+  },
+  "app": {
+    "windows": [{ "title": "PassMan", "width": 390, "height": 844 }],
+    "security": {
+      "csp": "default-src 'self'; connect-src ipc: http://ipc.localhost; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; object-src 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "icon": ["../../desktop/src-tauri/icons/icon.png"]
+  }
+}
