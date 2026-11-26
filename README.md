@@ -74,6 +74,47 @@ pnpm run dev
 Open the local URL printed by Vite (by default `http://localhost:5173`). The
 development server proxies `/api` requests to the backend on port 8000.
 
+### Desktop
+
+The desktop build uses the same React frontend in a Tauri window and stores
+encrypted records in a local SQLite database. It does not require FastAPI or
+PostgreSQL at runtime.
+
+Install the desktop dependencies and start it in development mode:
+
+```bash
+cd desktop
+pnpm install --frozen-lockfile
+pnpm run dev
+```
+
+Create Linux packages with:
+
+```bash
+pnpm run build
+```
+
+The build places `PassMan.AppImage`, `PassMan.deb`, and the unpacked
+`PassMan.AppDir` in the directory from which the build command was started.
+When run from `desktop`, they appear directly in `desktop`. To build them into
+a different directory, run:
+
+```bash
+pnpm run build -- --output /path/to/output
+```
+
+The portable build keeps its encrypted SQLite database beside the application:
+
+```text
+PassMan.AppImage
+PassMan.data/pass-man.sqlite3
+```
+
+Move `PassMan.AppImage` together with `PassMan.data` to retain the records. When
+running `PassMan.AppDir/AppRun`, the same data directory is created inside
+`PassMan.AppDir`. An existing database from the system application-data
+directory is copied to the portable location automatically on first launch.
+
 ## Using Pass-man
 
 - Use the password generator on the home page to create a password from a
@@ -115,30 +156,37 @@ backups.
 ## Screenshots
 
 ### Pass-gen
+
 ![Pass-gen](assets/pm1.png)
 
 ### Pass-gen settings
+
 ![Pass-gen](assets/pm2.png)
 
 ### Pass-gen password
+
 ![Pass-gen](assets/pm3.png)
 
 ### Pass-man manager password
+
 ![Pass-gen](assets/pm4.png)
 
 ### Pass-man list
+
 ![Pass-gen](assets/pm5.png)
 
 ### Pass-man enter master key
+
 ![Pass-gen](assets/pm6.png)
 
 ### Pass-man show password
+
 ![Pass-gen](assets/pm7.png)
 
 ### Pass-man show custom alphabet
+
 ![Pass-gen](assets/pm8.png)
 
 ### Pass-man edit/delete item
+
 ![Pass-gen](assets/pm9.png)
-
-

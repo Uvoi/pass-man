@@ -25,6 +25,16 @@ body {
     width: 100vw;
 }
 
+html {
+    color-scheme: dark;
+}
+
+select,
+option {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+}
+
 * {
     box-sizing: border-box;
 }

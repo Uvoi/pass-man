@@ -1,7 +1,6 @@
 import type { EncryptedData, EncryptedPassItem, PassItem } from "../types";
 import { encryptPassItems } from "../utils";
-
-const API_URL = "";
+import { passwordStorage, type StoredPasswordItem } from "./passwordStorage";
 
 export const mockMasterKeys: Record<number, string> = {
     0: "github-master",
@@ -9,15 +8,7 @@ export const mockMasterKeys: Record<number, string> = {
     2: "discord-master",
 };
 
-type ApiPasswordItem = {
-    id: number;
-    encrypted_data: string;
-    iv: string;
-    salt: string;
-    created_at: string;
-};
-
-const toEncryptedPassItem = (item: ApiPasswordItem): EncryptedPassItem => {
+const toEncryptedPassItem = (item: StoredPasswordItem): EncryptedPassItem => {
     return {
         id: item.id,
         iv: item.iv,
@@ -26,15 +17,7 @@ const toEncryptedPassItem = (item: ApiPasswordItem): EncryptedPassItem => {
     };
 };
 
-const getPasswordItems = async (): Promise<ApiPasswordItem[]> => {
-    const response = await fetch(`${API_URL}/api/password-items`);
-
-    if (!response.ok) {
-        throw new Error(`Failed to load password items: ${response.status}`);
-    }
-
-    return response.json();
-};
+const getPasswordItems = () => passwordStorage.getAll();
 
 export const getPassManData = async (): Promise<EncryptedData> => {
     const items = await getPasswordItems();
@@ -43,49 +26,15 @@ export const getPassManData = async (): Promise<EncryptedData> => {
 };
 
 const createPasswordItem = async (item: EncryptedPassItem): Promise<void> => {
-    const response = await fetch(`${API_URL}/api/password-items`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            encrypted_data: item.data,
-            iv: item.iv,
-            salt: item.salt,
-        }),
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to create password item: ${response.status}`);
-    }
+    await passwordStorage.create(item);
 };
 
 const updatePasswordItem = async (item: EncryptedPassItem): Promise<void> => {
-    const response = await fetch(`${API_URL}/api/password-items/${item.id}`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            encrypted_data: item.data,
-            iv: item.iv,
-            salt: item.salt,
-        }),
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to update password item: ${response.status}`);
-    }
+    await passwordStorage.update(item);
 };
 
 const deletePasswordItem = async (id: number): Promise<void> => {
-    const response = await fetch(`${API_URL}/api/password-items/${id}`, {
-        method: "DELETE",
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to delete password item: ${response.status}`);
-    }
+    await passwordStorage.delete(id);
 };
 
 export const savePassManData = async (data: EncryptedData): Promise<void> => {

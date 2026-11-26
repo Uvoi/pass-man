@@ -1,0 +1,14 @@
+{
+  "name": "pass-man-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "node scripts/build.mjs",
+    "export": "node scripts/export-artifacts.mjs"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}

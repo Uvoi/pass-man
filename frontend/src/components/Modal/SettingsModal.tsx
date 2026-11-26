@@ -1,4 +1,4 @@
-import { Pencil, Settings } from "lucide-react";
+import { ChevronDown, Pencil, Settings } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "../Button";
@@ -133,19 +133,26 @@ export const SettingsModal = ({ settings, onChange, disabled, className }: Setti
                 <div className="flex flex-col gap-12">
                     <label className="flex flex-col gap-2 text-text">
                         <span className="text-xl">Generator version</span>
-                        <select
-                            value={generatorVersion}
-                            onChange={(event) =>
-                                setLocal((previous) => ({
-                                    ...previous,
-                                    generatorVersion: Number(event.target.value) as 1 | 2,
-                                }))
-                            }
-                            className="rounded-lg border-2 border-border bg-surface px-3 py-2 text-xl focus-visible:outline-none"
-                        >
-                            <option value={1}>Legacy V1 — compatible</option>
-                            <option value={2}>V2 — guaranteed length</option>
-                        </select>
+                        <div className="relative">
+                            <select
+                                value={generatorVersion}
+                                onChange={(event) =>
+                                    setLocal((previous) => ({
+                                        ...previous,
+                                        generatorVersion: Number(event.target.value) as 1 | 2,
+                                    }))
+                                }
+                                className="w-full appearance-none rounded-lg border-2 border-border bg-surface px-3 py-2 pr-10 text-xl text-text focus-visible:outline-none"
+                            >
+                                <option value={1}>Legacy V1 — compatible</option>
+                                <option value={2}>V2 — guaranteed length</option>
+                            </select>
+                            <ChevronDown
+                                aria-hidden="true"
+                                size={20}
+                                className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-text"
+                            />
+                        </div>
                         <span className="text-sm opacity-70">
                             Changing the version changes the generated password.
                         </span>

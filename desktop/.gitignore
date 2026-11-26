@@ -1,0 +1,10 @@
+/node_modules
+/src-tauri/target
+/src-tauri/gen/schemas
+/.pnpm-store
+/.cache
+/.tmp
+/PassMan.AppDir
+/PassMan.AppImage
+/PassMan.deb
+/PassMan.data
