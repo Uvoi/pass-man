@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { defaultSettings, type GenerateSettings, getCharset } from "../../components/Generate";
 import GenerateWorker from "../../components/Generate/generate.worker.ts?worker";
@@ -65,13 +65,23 @@ export const usePassGen = ({ onGenerated }: UsePassGenParams = {}) => {
         setTitleTrigger((previous) => previous + 1);
 
         try {
-            const pass = await new Promise<string>((resolve) => {
+            const pass = await new Promise<string>((resolve, reject) => {
                 const worker = new GenerateWorker();
 
                 worker.onmessage = (event: MessageEvent<string>) => {
                     resolve(event.data);
 
                     worker.terminate();
+                };
+
+                worker.onerror = (event) => {
+                    worker.terminate();
+                    reject(new Error(event.message || "Password generator worker failed"));
+                };
+
+                worker.onmessageerror = () => {
+                    worker.terminate();
+                    reject(new Error("Password generator worker returned invalid data"));
                 };
 
                 worker.postMessage({
@@ -105,7 +115,11 @@ export const usePassGen = ({ onGenerated }: UsePassGenParams = {}) => {
                     params: settings,
                 };
 
-                await onGenerated(item);
+                try {
+                    await onGenerated(item);
+                } catch {
+                    showError("Password generated, but failed to add it to PassMan");
+                }
             }
         } catch {
             showError("Failed to generate password");
@@ -120,6 +134,13 @@ export const usePassGen = ({ onGenerated }: UsePassGenParams = {}) => {
         setTag("");
         setPassword("");
     };
+
+    useEffect(() => {
+        return () => {
+            if (clearTimer.current) clearTimeout(clearTimer.current);
+            if (errorTimer.current) clearTimeout(errorTimer.current);
+        };
+    }, []);
 
     return {
         masterKey,

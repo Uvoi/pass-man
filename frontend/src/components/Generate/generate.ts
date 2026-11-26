@@ -15,6 +15,8 @@ export type ArgonParams = {
     hashLength: number;
 };
 
+export type GeneratorVersion = 1 | 2;
+
 export const defaultCharsetGroups = {
     letters: {
         label: "A-z",
@@ -33,12 +35,14 @@ export const defaultCharsetGroups = {
 export type CharsetGroupKey = keyof typeof defaultCharsetGroups;
 
 export type GenerateSettings = ArgonParams & {
+    generatorVersion?: GeneratorVersion;
     selectedGroups: Record<CharsetGroupKey, boolean>;
     charsetGroups: Record<CharsetGroupKey, string>;
     customAlphabet: string;
 };
 
 export const defaultSettings: GenerateSettings = {
+    generatorVersion: 2,
     iterations: 3,
     memorySize: 65536,
     hashLength: 16,
@@ -76,7 +80,7 @@ export const getCharset = (settings: GenerateSettings) => {
     return normalizeCharset([...selected, ...Array.from(settings.customAlphabet)].join(""));
 };
 
-const mapToCharset = (bytes: Uint8Array, length: number, charset: string) => {
+const mapToCharsetLegacy = (bytes: Uint8Array, length: number, charset: string) => {
     const limit = 256 - (256 % charset.length);
     let result = "";
     let i = 0;
@@ -85,6 +89,47 @@ const mapToCharset = (bytes: Uint8Array, length: number, charset: string) => {
         if (byte >= limit) continue;
         result += charset[byte % charset.length];
         if (++i === length) break;
+    }
+
+    return result;
+};
+
+const getV2ByteStream = async (seed: Uint8Array, counter: number) => {
+    const domain = new TextEncoder().encode("pass-man:generator:v2");
+    const input = new Uint8Array(domain.length + seed.length + 4);
+
+    input.set(domain);
+    input.set(seed, domain.length);
+    new DataView(input.buffer).setUint32(domain.length + seed.length, counter);
+
+    return new Uint8Array(await crypto.subtle.digest("SHA-256", input));
+};
+
+const mapToCharsetV2 = async (seed: Uint8Array, length: number, charset: string) => {
+    const symbols = Array.from(charset);
+
+    if (symbols.length === 0 || symbols.length > 0x1_0000_0000) {
+        throw new Error("Alphabet size is not supported");
+    }
+
+    const range = 0x1_0000_0000;
+    const limit = range - (range % symbols.length);
+    let result = "";
+    let counter = 0;
+
+    while (Array.from(result).length < length) {
+        const bytes = await getV2ByteStream(seed, counter++);
+        const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+
+        for (let offset = 0; offset < bytes.byteLength; offset += 4) {
+            const value = view.getUint32(offset);
+
+            if (value >= limit) continue;
+
+            result += symbols[value % symbols.length];
+
+            if (Array.from(result).length === length) break;
+        }
     }
 
     return result;
@@ -102,10 +147,19 @@ export const getPassword = async (
 
     const salt = getSalt(normalizedKey, normalizedTag);
 
-    const hash = await getHash(normalizedMasterKey, salt, params);
-
     const charset = getCharset(params);
-    const finalPassword = mapToCharset(hash, params.hashLength, charset);
+
+    if (params.generatorVersion === 2) {
+        const seed = await getHash(normalizedMasterKey, salt, {
+            ...params,
+            hashLength: 32,
+        });
+
+        return mapToCharsetV2(seed, params.hashLength, charset);
+    }
+
+    const hash = await getHash(normalizedMasterKey, salt, params);
+    const finalPassword = mapToCharsetLegacy(hash, params.hashLength, charset);
 
     return finalPassword;
 };

@@ -109,6 +109,7 @@ export const SettingsModal = ({ settings, onChange, disabled, className }: Setti
     };
 
     const alphabetLength = getCharset(local).length;
+    const generatorVersion = local.generatorVersion ?? 1;
 
     return (
         <Modal
@@ -127,6 +128,25 @@ export const SettingsModal = ({ settings, onChange, disabled, className }: Setti
         >
             {(close) => (
                 <div className="flex flex-col gap-12">
+                    <label className="flex flex-col gap-2 text-text">
+                        <span className="text-xl">Generator version</span>
+                        <select
+                            value={generatorVersion}
+                            onChange={(event) =>
+                                setLocal((previous) => ({
+                                    ...previous,
+                                    generatorVersion: Number(event.target.value) as 1 | 2,
+                                }))
+                            }
+                            className="rounded-lg border-2 border-border bg-surface px-3 py-2 text-xl focus-visible:outline-none"
+                        >
+                            <option value={1}>Legacy V1 — compatible</option>
+                            <option value={2}>V2 — guaranteed length</option>
+                        </select>
+                        <span className="text-sm opacity-70">
+                            Changing the version changes the generated password.
+                        </span>
+                    </label>
                     <div className="flex flex-col gap-8">
                         <Slider
                             label="Iterations"

@@ -59,6 +59,10 @@ export const PassMan = ({ isActive }: PassManProps) => {
 
     const [editItem, setEditItem] = useState<PassItem | null>(null);
 
+    const [errorMessage, setErrorMessage] = useState("");
+
+    const [managerError, setManagerError] = useState("");
+
     const wasActive = useRef(false);
 
     useEffect(() => {
@@ -76,6 +80,7 @@ export const PassMan = ({ isActive }: PassManProps) => {
         if (managerPassword) {
             void loadData(managerPassword, false).catch((error: unknown) => {
                 console.error("Failed to refresh PassMan data", error);
+                setErrorMessage("Failed to refresh PassMan data");
             });
         }
     }, [isActive, loadData, managerPassword]);
@@ -87,22 +92,31 @@ export const PassMan = ({ isActive }: PassManProps) => {
     }, [isAuthenticated, setGeneratedPasswords]);
 
     const handleManagerPasswordConfirm = async () => {
-        await loadData(managerInput);
-
-        setManagerModalOpen(false);
-        setManagerInput("");
+        try {
+            await loadData(managerInput);
+            setManagerModalOpen(false);
+            setManagerInput("");
+            setManagerError("");
+        } catch {
+            setManagerError("Failed to load PassMan data");
+        }
     };
 
     const handleManagerPasswordClose = () => {
         if (isAuthenticated) {
             setManagerModalOpen(false);
+            setManagerError("");
         }
     };
 
     const handleDeleteItem = async (item: PassItem) => {
-        await handleDelete(item);
-
-        setContextMenu(null);
+        try {
+            await handleDelete(item);
+            setContextMenu(null);
+            setErrorMessage("");
+        } catch {
+            setErrorMessage("Failed to delete the password record");
+        }
     };
 
     const handleEditItem = (item: PassItem) => {
@@ -125,8 +139,15 @@ export const PassMan = ({ isActive }: PassManProps) => {
                 onChangeManagerPassword={() => {
                     setManagerModalOpen(true);
                     setManagerInput("");
+                    setManagerError("");
                 }}
             />
+
+            {errorMessage && (
+                <div role="alert" className="mb-4 rounded-lg border border-error p-3 text-error">
+                    {errorMessage}
+                </div>
+            )}
 
             <PassManTable
                 loading={loading}
@@ -147,6 +168,7 @@ export const PassMan = ({ isActive }: PassManProps) => {
             {(managerModalOpen || !isAuthenticated) && (
                 <ManagerPasswordModal
                     value={managerInput}
+                    error={managerError}
                     onChange={setManagerInput}
                     onConfirm={handleManagerPasswordConfirm}
                     onClose={handleManagerPasswordClose}
@@ -174,10 +196,10 @@ export const PassMan = ({ isActive }: PassManProps) => {
             {editItem && (
                 <EditPassModal
                     item={editItem}
-                    onSave={(key, tag, params) => {
-                        handleEdit(editItem, key, tag, params);
-
+                    onSave={async (key, tag, params) => {
+                        await handleEdit(editItem, key, tag, params);
                         setEditItem(null);
+                        setErrorMessage("");
                     }}
                     onClose={() => setEditItem(null)}
                 />

@@ -8,6 +8,7 @@ import { usePassGenManager } from "./usePassGenManager";
 
 export const PassGen = () => {
     const [addToPassMan, setAddToPassMan] = useState(false);
+    const [managerError, setManagerError] = useState("");
 
     const {
         managerModalOpen,
@@ -19,9 +20,7 @@ export const PassGen = () => {
         confirmManagerPassword,
         closeManagerModal,
     } = usePassGenManager({
-        onError: (message) => {
-            console.error(message);
-        },
+        onError: setManagerError,
     });
 
     const {
@@ -102,9 +101,13 @@ export const PassGen = () => {
             {managerModalOpen && (
                 <ManagerPasswordModal
                     value={managerInput}
+                    error={managerError}
                     onChange={setManagerInput}
                     onConfirm={confirmManagerPassword}
-                    onClose={closeManagerModal}
+                    onClose={() => {
+                        setManagerError("");
+                        closeManagerModal();
+                    }}
                 />
             )}
         </div>

@@ -4,6 +4,7 @@ import { Input } from "../Input";
 type ManagerPasswordModalProps = {
     value: string;
     title?: string;
+    error?: string;
     onChange: (value: string) => void;
     onConfirm: () => void;
     onClose: () => void;
@@ -12,6 +13,7 @@ type ManagerPasswordModalProps = {
 export const ManagerPasswordModal = ({
     value,
     title = "Manager password",
+    error,
     onChange,
     onConfirm,
     onClose,
@@ -35,6 +37,8 @@ export const ManagerPasswordModal = ({
                         rightAddon="visible"
                         placeholder="Manager password"
                     />
+
+                    {error && <div className="text-error">{error}</div>}
 
                     <div className="flex justify-end gap-3">
                         <Button onClick={onClose} className="bg-transparent!">

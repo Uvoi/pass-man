@@ -18,6 +18,8 @@ export const usePassGenManager = ({ onError }: UsePassGenManagerParams) => {
     const [pendingPassItem, setPendingPassItem] = useState<PassItem | null>(null);
 
     const addToPassMan = async (item: PassItem) => {
+        onError("");
+
         if (managerPassword) {
             await addPassManItem(item, managerPassword);
 
@@ -33,6 +35,8 @@ export const usePassGenManager = ({ onError }: UsePassGenManagerParams) => {
         if (!pendingPassItem || !managerInput) {
             return;
         }
+
+        onError("");
 
         try {
             await addPassManItem(pendingPassItem, managerInput);

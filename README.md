@@ -12,10 +12,11 @@ Pass-man stores its records in a backend database in encrypted form.
 - View, copy, edit, and delete saved records
 - Encrypt record contents in the browser before sending them to the API
 - Choose a custom character alphabet for password generation
+- Choose between the compatible Legacy V1 generator and V2 with guaranteed length
 
 ## Requirements
 
-- Node.js and npm
+- Node.js and pnpm
 - Python 3.10 or newer
 - PostgreSQL
 
@@ -66,8 +67,8 @@ server:
 
 ```bash
 cd frontend
-npm ci
-npm run dev
+pnpm install --frozen-lockfile
+pnpm run dev
 ```
 
 Open the local URL printed by Vite (by default `http://localhost:5173`). The
@@ -77,6 +78,8 @@ development server proxies `/api` requests to the backend on port 8000.
 
 - Use the password generator on the home page to create a password from a
   master key, key, and optional tag.
+- Existing saved records without a generator version use Legacy V1. New
+  records use V2 by default. Changing the version changes the generated password.
 - To save a generated record, enable the option to add it to Pass-man. You will
   be prompted for the Pass-man manager password.
 - Open the manager with the **Pass-man** navigation option. Enter the manager

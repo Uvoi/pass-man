@@ -7,7 +7,7 @@ import { SettingsModal } from "../Modal";
 
 type EditPassModalProps = {
     item: PassItem;
-    onSave: (key: string, tag: string, params: PassItem["params"]) => void;
+    onSave: (key: string, tag: string, params: PassItem["params"]) => Promise<void>;
     onClose: () => void;
 };
 
@@ -15,16 +15,26 @@ export const EditPassModal = ({ item, onSave, onClose }: EditPassModalProps) => 
     const [key, setKey] = useState(item.key);
     const [tag, setTag] = useState(item.tag);
     const [params, setParams] = useState(item.params);
+    const [saving, setSaving] = useState(false);
+    const [saveError, setSaveError] = useState("");
 
     const keyError = key.length > 0 && (key.includes(" ") || key.length < 2);
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!key || keyError) {
             return;
         }
 
-        onSave(key, tag, params);
-        onClose();
+        setSaving(true);
+        setSaveError("");
+
+        try {
+            await onSave(key, tag, params);
+        } catch {
+            setSaveError("Failed to save changes");
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (
@@ -51,13 +61,15 @@ export const EditPassModal = ({ item, onSave, onClose }: EditPassModalProps) => 
 
                     <SettingsModal settings={params} onChange={setParams} />
 
+                    {saveError && <div className="text-error">{saveError}</div>}
+
                     <div className="flex justify-end gap-3">
-                        <Button onClick={onClose} className="bg-transparent!">
+                        <Button onClick={onClose} className="bg-transparent!" disabled={saving}>
                             Cancel
                         </Button>
 
-                        <Button onClick={handleSave} disabled={!key || keyError}>
-                            Save
+                        <Button onClick={handleSave} disabled={!key || keyError || saving}>
+                            {saving ? "Saving..." : "Save"}
                         </Button>
                     </div>
                 </div>

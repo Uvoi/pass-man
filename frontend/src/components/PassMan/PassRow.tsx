@@ -90,6 +90,8 @@ export const PassRow = ({
 
                 <Param label="pl" value={params.hashLength} />
 
+                <Param label="v" value={params.generatorVersion ?? 1} />
+
                 {alphabet && <Param label="a" value={alphabet} />}
 
                 {hasCustomAlphabet && <Param label="ca" onClick={onCustomAlphabet} />}
